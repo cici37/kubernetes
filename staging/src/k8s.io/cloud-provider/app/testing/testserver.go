@@ -33,6 +33,7 @@ import (
 	"k8s.io/cloud-provider/app"
 	"k8s.io/cloud-provider/app/config"
 	"k8s.io/cloud-provider/options"
+	"k8s.io/klog/v2"
 	cliflag "k8s.io/component-base/cli/flag"
 )
 
@@ -54,6 +55,8 @@ type Logger interface {
 	Fatalf(format string, args ...interface{})
 	Logf(format string, args ...interface{})
 }
+var nodeConfig  NodeIPAMControllerConfiguration
+var nodeOptions NodeIPAMControllerOptions
 
 // StartTestServer starts a cloud-controller-manager. A rest client config and a tear-down func,
 // and location of the tmpdir are returned.
@@ -102,8 +105,14 @@ func StartTestServer(t Logger, customFlags []string) (result TestServer, err err
 		}
 		return cloud
 	}
+	controllerInitializers := app.DefaultInitFuncConstructors
 	fss := cliflag.NamedFlagSets{}
-	command := app.NewCloudControllerManagerCommand(s, cloudInitializer, app.DefaultInitFuncConstructors, fss, stopCh)
+
+	nodeOptions.NodeIPAMControllerConfiguration = &nodeConfig
+	nodeOptions.AddFlags(fss.FlagSet("nodeipam controller"))
+	controllerInitializers["nodeipam"] = startNodeIpamControllerWrapper
+
+	command := app.NewCloudControllerManagerCommand(s, cloudInitializer, controllerInitializers, fss, stopCh)
 	pflag.CommandLine.SetNormalizeFunc(cliflag.WordSepNormalizeFunc)
 
 	commandArgs := []string{}
@@ -227,4 +236,14 @@ func createListenerOnFreePort() (net.Listener, int, error) {
 	}
 
 	return ln, tcpAddr.Port, nil
+}
+
+func startNodeIpamControllerWrapper(completedConfig *config.CompletedConfig, cloud cloudprovider.Interface) app.InitFunc {
+	errors := nodeOptions.Validate()
+	if len(errors) > 0 {
+		klog.Fatal("NodeIPAM controller values are not properly set.")
+	}
+	nodeOptions.ApplyTo(&nodeConfig)
+	klog.Warningf("ccDebug serviceCIDR: ", nodeOptions.ServiceCIDR)
+	return nil
 }

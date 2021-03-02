@@ -163,9 +163,9 @@ users:
 		tester     componentTester
 		extraFlags []string
 	}{
-		{"kube-controller-manager", kubeControllerManagerTester{}, nil},
+		//{"kube-controller-manager", kubeControllerManagerTester{}, nil},
 		{"cloud-controller-manager", cloudControllerManagerTester{}, []string{"--cloud-provider=fake"}},
-		{"kube-scheduler", kubeSchedulerTester{}, nil},
+		//{"kube-scheduler", kubeSchedulerTester{}, nil},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -183,67 +183,75 @@ func testComponent(t *testing.T, tester componentTester, kubeconfig, brokenKubec
 		wantErr                          bool
 		wantSecureCode, wantInsecureCode *int
 	}{
-		{"no-flags", nil, "/healthz", false, true, nil, nil},
+		//{"no-flags", nil, "/healthz", false, true, nil, nil},
 		{"insecurely /healthz", []string{
 			"--secure-port=0",
 			"--port=10253",
 			"--kubeconfig", kubeconfig,
 			"--leader-elect=false",
+			"--service-cluster-ip-range=test",
 		}, "/healthz", true, false, nil, intPtr(http.StatusOK)},
-		{"insecurely /metrics", []string{
+		{"insecurely /healthz", []string{
 			"--secure-port=0",
 			"--port=10253",
 			"--kubeconfig", kubeconfig,
 			"--leader-elect=false",
-		}, "/metrics", true, false, nil, intPtr(http.StatusOK)},
-		{"/healthz without authn/authz", []string{
-			"--port=0",
-			"--kubeconfig", kubeconfig,
-			"--leader-elect=false",
-		}, "/healthz", true, false, intPtr(http.StatusOK), nil},
-		{"/metrics without authn/authz", []string{
-			"--kubeconfig", kubeconfig,
-			"--leader-elect=false",
-			"--port=10253",
-		}, "/metrics", true, false, intPtr(http.StatusForbidden), intPtr(http.StatusOK)},
-		{"authorization skipped for /healthz with authn/authz", []string{
-			"--port=0",
-			"--authentication-kubeconfig", kubeconfig,
-			"--authorization-kubeconfig", kubeconfig,
-			"--kubeconfig", kubeconfig,
-			"--leader-elect=false",
-		}, "/healthz", false, false, intPtr(http.StatusOK), nil},
-		{"authorization skipped for /healthz with BROKEN authn/authz", []string{
-			"--port=0",
-			"--authentication-skip-lookup", // to survive unaccessible extensions-apiserver-authentication configmap
-			"--authentication-kubeconfig", brokenKubeconfig,
-			"--authorization-kubeconfig", brokenKubeconfig,
-			"--kubeconfig", kubeconfig,
-			"--leader-elect=false",
-		}, "/healthz", false, false, intPtr(http.StatusOK), nil},
-		{"not authorized /metrics", []string{
-			"--port=0",
-			"--authentication-kubeconfig", kubeconfig,
-			"--authorization-kubeconfig", kubeconfig,
-			"--kubeconfig", kubeconfig,
-			"--leader-elect=false",
-		}, "/metrics", false, false, intPtr(http.StatusForbidden), nil},
-		{"not authorized /metrics with BROKEN authn/authz", []string{
-			"--port=10253",
-			"--authentication-kubeconfig", kubeconfig,
-			"--authorization-kubeconfig", brokenKubeconfig,
-			"--kubeconfig", kubeconfig,
-			"--leader-elect=false",
-		}, "/metrics", false, false, intPtr(http.StatusInternalServerError), intPtr(http.StatusOK)},
-		{"always-allowed /metrics with BROKEN authn/authz", []string{
-			"--port=0",
-			"--authentication-skip-lookup", // to survive unaccessible extensions-apiserver-authentication configmap
-			"--authentication-kubeconfig", kubeconfig,
-			"--authorization-kubeconfig", kubeconfig,
-			"--authorization-always-allow-paths", "/healthz,/metrics",
-			"--kubeconfig", kubeconfig,
-			"--leader-elect=false",
-		}, "/metrics", false, false, intPtr(http.StatusOK), nil},
+			"--service-cluster-ip-range=test,test,test",
+		}, "/healthz", true, false, nil, intPtr(http.StatusOK)},
+		//{"insecurely /metrics", []string{
+		//	"--secure-port=0",
+		//	"--port=10253",
+		//	"--kubeconfig", kubeconfig,
+		//	"--leader-elect=false",
+		//}, "/metrics", true, false, nil, intPtr(http.StatusOK)},
+		//{"/healthz without authn/authz", []string{
+		//	"--port=0",
+		//	"--kubeconfig", kubeconfig,
+		//	"--leader-elect=false",
+		//}, "/healthz", true, false, intPtr(http.StatusOK), nil},
+		//{"/metrics without authn/authz", []string{
+		//	"--kubeconfig", kubeconfig,
+		//	"--leader-elect=false",
+		//	"--port=10253",
+		//}, "/metrics", true, false, intPtr(http.StatusForbidden), intPtr(http.StatusOK)},
+		//{"authorization skipped for /healthz with authn/authz", []string{
+		//	"--port=0",
+		//	"--authentication-kubeconfig", kubeconfig,
+		//	"--authorization-kubeconfig", kubeconfig,
+		//	"--kubeconfig", kubeconfig,
+		//	"--leader-elect=false",
+		//}, "/healthz", false, false, intPtr(http.StatusOK), nil},
+		//{"authorization skipped for /healthz with BROKEN authn/authz", []string{
+		//	"--port=0",
+		//	"--authentication-skip-lookup", // to survive unaccessible extensions-apiserver-authentication configmap
+		//	"--authentication-kubeconfig", brokenKubeconfig,
+		//	"--authorization-kubeconfig", brokenKubeconfig,
+		//	"--kubeconfig", kubeconfig,
+		//	"--leader-elect=false",
+		//}, "/healthz", false, false, intPtr(http.StatusOK), nil},
+		//{"not authorized /metrics", []string{
+		//	"--port=0",
+		//	"--authentication-kubeconfig", kubeconfig,
+		//	"--authorization-kubeconfig", kubeconfig,
+		//	"--kubeconfig", kubeconfig,
+		//	"--leader-elect=false",
+		//}, "/metrics", false, false, intPtr(http.StatusForbidden), nil},
+		//{"not authorized /metrics with BROKEN authn/authz", []string{
+		//	"--port=10253",
+		//	"--authentication-kubeconfig", kubeconfig,
+		//	"--authorization-kubeconfig", brokenKubeconfig,
+		//	"--kubeconfig", kubeconfig,
+		//	"--leader-elect=false",
+		//}, "/metrics", false, false, intPtr(http.StatusInternalServerError), intPtr(http.StatusOK)},
+		//{"always-allowed /metrics with BROKEN authn/authz", []string{
+		//	"--port=0",
+		//	"--authentication-skip-lookup", // to survive unaccessible extensions-apiserver-authentication configmap
+		//	"--authentication-kubeconfig", kubeconfig,
+		//	"--authorization-kubeconfig", kubeconfig,
+		//	"--authorization-always-allow-paths", "/healthz,/metrics",
+		//	"--kubeconfig", kubeconfig,
+		//	"--leader-elect=false",
+		//}, "/metrics", false, false, intPtr(http.StatusOK), nil},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
