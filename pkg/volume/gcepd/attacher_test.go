@@ -27,10 +27,10 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/util/sets"
 	cloudprovider "k8s.io/cloud-provider"
+	"k8s.io/cloud-provider-gcp/providers/gce"
 	cloudvolume "k8s.io/cloud-provider/volume"
 	"k8s.io/kubernetes/pkg/volume"
 	volumetest "k8s.io/kubernetes/pkg/volume/testing"
-	"k8s.io/legacy-cloud-providers/gce"
 
 	"strings"
 

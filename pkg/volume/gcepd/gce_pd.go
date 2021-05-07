@@ -34,10 +34,10 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	gcecloud "k8s.io/cloud-provider-gcp/providers/gce"
 	volumehelpers "k8s.io/cloud-provider/volume/helpers"
 	"k8s.io/kubernetes/pkg/volume"
 	"k8s.io/kubernetes/pkg/volume/util"
-	gcecloud "k8s.io/legacy-cloud-providers/gce"
 )
 
 // ProbeVolumePlugins is the primary entrypoint for volume plugins.

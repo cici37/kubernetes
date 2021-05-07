@@ -113,6 +113,7 @@ require (
 	k8s.io/cli-runtime v0.0.0
 	k8s.io/client-go v0.0.0
 	k8s.io/cloud-provider v0.0.0
+	k8s.io/cloud-provider-gcp/providers v0.21.0
 	k8s.io/cluster-bootstrap v0.0.0
 	k8s.io/code-generator v0.0.0
 	k8s.io/component-base v0.0.0
@@ -500,6 +501,7 @@ replace (
 	k8s.io/cli-runtime => ./staging/src/k8s.io/cli-runtime
 	k8s.io/client-go => ./staging/src/k8s.io/client-go
 	k8s.io/cloud-provider => ./staging/src/k8s.io/cloud-provider
+	k8s.io/cloud-provider-gcp/providers => k8s.io/cloud-provider-gcp/providers v0.21.0
 	k8s.io/cluster-bootstrap => ./staging/src/k8s.io/cluster-bootstrap
 	k8s.io/code-generator => ./staging/src/k8s.io/code-generator
 	k8s.io/component-base => ./staging/src/k8s.io/component-base

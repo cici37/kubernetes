@@ -112,7 +112,7 @@ func ProvideContainerRegistry(client *http.Client, image string) credentialconfi
 
 	var parsedBlob TokenBlob
 	if err := json.Unmarshal([]byte(tokenJSONBlob), &parsedBlob); err != nil {
-		klog.Errorf("error while parsing json blob of length %d", len(tokenJSONBlob))
+		klog.Errorf("while parsing json blob %s: %v", tokenJSONBlob, err)
 		return cfg
 	}
 

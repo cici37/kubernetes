@@ -1870,6 +1870,10 @@ k8s.io/cloud-provider/service/helpers
 k8s.io/cloud-provider/volume
 k8s.io/cloud-provider/volume/errors
 k8s.io/cloud-provider/volume/helpers
+# k8s.io/cloud-provider-gcp/providers v0.21.0 => k8s.io/cloud-provider-gcp/providers v0.21.0
+## explicit
+k8s.io/cloud-provider-gcp/providers/gce
+k8s.io/cloud-provider-gcp/providers/gce/gcpcredential
 # k8s.io/cluster-bootstrap v0.0.0 => ./staging/src/k8s.io/cluster-bootstrap
 ## explicit
 k8s.io/cluster-bootstrap/token/api
@@ -2159,8 +2163,6 @@ k8s.io/legacy-cloud-providers/azure/clients/vmssvmclient
 k8s.io/legacy-cloud-providers/azure/clients/vmssvmclient/mockvmssvmclient
 k8s.io/legacy-cloud-providers/azure/metrics
 k8s.io/legacy-cloud-providers/azure/retry
-k8s.io/legacy-cloud-providers/gce
-k8s.io/legacy-cloud-providers/gce/gcpcredential
 k8s.io/legacy-cloud-providers/openstack
 k8s.io/legacy-cloud-providers/vsphere
 k8s.io/legacy-cloud-providers/vsphere/testing
@@ -2686,6 +2688,7 @@ sigs.k8s.io/yaml
 # k8s.io/cli-runtime => ./staging/src/k8s.io/cli-runtime
 # k8s.io/client-go => ./staging/src/k8s.io/client-go
 # k8s.io/cloud-provider => ./staging/src/k8s.io/cloud-provider
+# k8s.io/cloud-provider-gcp/providers => k8s.io/cloud-provider-gcp/providers v0.21.0
 # k8s.io/cluster-bootstrap => ./staging/src/k8s.io/cluster-bootstrap
 # k8s.io/code-generator => ./staging/src/k8s.io/code-generator
 # k8s.io/component-base => ./staging/src/k8s.io/component-base

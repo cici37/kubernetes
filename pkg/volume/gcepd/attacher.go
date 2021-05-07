@@ -36,9 +36,9 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/sets"
+	"k8s.io/cloud-provider-gcp/providers/gce"
 	"k8s.io/kubernetes/pkg/volume"
 	volumeutil "k8s.io/kubernetes/pkg/volume/util"
-	"k8s.io/legacy-cloud-providers/gce"
 )
 
 type gcePersistentDiskAttacher struct {
