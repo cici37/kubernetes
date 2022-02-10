@@ -174,6 +174,11 @@ func (a customResourceStrategy) Validate(ctx context.Context, obj runtime.Object
 
 		// validate x-kubernetes-validations rules
 		if celValidator, ok := a.celValidators[v]; ok {
+			// TODO @cici37: confirm the limit
+			if celValidator.Cost(nil, a.structuralSchemas[v], u.Object) > 1000 {
+				_, cancelFunc := context.WithCancel(ctx)
+				cancelFunc()
+			}
 			errs = append(errs, celValidator.Validate(nil, a.structuralSchemas[v], u.Object)...)
 		}
 	}

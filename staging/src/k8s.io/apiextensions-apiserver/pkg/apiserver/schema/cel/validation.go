@@ -107,6 +107,22 @@ func (s *Validator) Validate(fldPath *field.Path, sts *schema.Structural, obj in
 	return errs
 }
 
+func (s *Validator) Cost(fldPath *field.Path, sts *schema.Structural, obj interface{}) int64 {
+	if s == nil || obj == nil {
+		return 0
+	}
+
+	cost := s.costForExpressions(fldPath, sts, obj)
+	switch obj := obj.(type) {
+	case []interface{}:
+		return cost + s.costForArray(fldPath, sts, obj)
+	case map[string]interface{}:
+		return cost + s.costForMap(fldPath, sts, obj)
+	}
+
+	return cost
+}
+
 func (s *Validator) validateExpressions(fldPath *field.Path, sts *schema.Structural, obj interface{}) (errs field.ErrorList) {
 	if obj == nil {
 		// We only validate non-null values. Rules that need to check for the state of a nullable value or the presence of an optional
@@ -161,6 +177,38 @@ func (s *Validator) validateExpressions(fldPath *field.Path, sts *schema.Structu
 	return errs
 }
 
+func (s *Validator) costForExpressions(fldPath *field.Path, sts *schema.Structural, obj interface{}) int64 {
+	var cost int64 = 0
+
+	if obj == nil {
+		// We only validate non-null values. Rules that need to check for the state of a nullable value or the presence of an optional
+		// field must do so from the surrounding schema. E.g. if an array has nullable string items, a rule on the array
+		// schema can check if items are null, but a rule on the nullable string schema only validates the non-null strings.
+		return 0
+	}
+	if s.compilationErr != nil {
+		return 0
+	}
+	if len(s.compiledRules) == 0 {
+		return 0 // nothing to do
+	}
+	for _, compiled := range s.compiledRules {
+		if compiled.Error != nil {
+			continue
+		}
+		if compiled.Program == nil {
+			// rule is empty
+			continue
+		}
+
+		coster := compiled.Program.(interpreter.Coster)
+		_, maxCost := coster.Cost()
+		cost += maxCost
+	}
+
+	return cost
+}
+
 func ruleErrorString(rule apiextensions.ValidationRule) string {
 	if len(rule.Message) > 0 {
 		return strings.TrimSpace(rule.Message)
@@ -210,6 +258,31 @@ func (s *Validator) validateMap(fldPath *field.Path, sts *schema.Structural, obj
 	return errs
 }
 
+func (s *Validator) costForMap(fldPath *field.Path, sts *schema.Structural, obj map[string]interface{}) int64 {
+	var cost int64 = 0
+
+	if s == nil || obj == nil {
+		return 0
+	}
+
+	if s.AdditionalProperties != nil && sts.AdditionalProperties != nil && sts.AdditionalProperties.Structural != nil {
+		for k, v := range obj {
+			cost += s.AdditionalProperties.Cost(fldPath.Key(k), sts.AdditionalProperties.Structural, v)
+		}
+	}
+	if s.Properties != nil && sts.Properties != nil {
+		for k, v := range obj {
+			stsProp, stsOk := sts.Properties[k]
+			sub, ok := s.Properties[k]
+			if ok && stsOk {
+				cost += sub.Cost(fldPath.Child(k), &stsProp, v)
+			}
+		}
+	}
+
+	return cost
+}
+
 func (s *Validator) validateArray(fldPath *field.Path, sts *schema.Structural, obj []interface{}) field.ErrorList {
 	var errs field.ErrorList
 
@@ -220,4 +293,16 @@ func (s *Validator) validateArray(fldPath *field.Path, sts *schema.Structural, o
 	}
 
 	return errs
+}
+
+func (s *Validator) costForArray(fldPath *field.Path, sts *schema.Structural, obj []interface{}) int64 {
+	var cost int64 = 0
+
+	if s.Items != nil && sts.Items != nil {
+		for i := range obj {
+			cost += s.Items.Cost(fldPath.Index(i), sts.Items, obj[i])
+		}
+	}
+
+	return cost
 }
