@@ -1,3 +1,5 @@
+//go:build !NO_CEL_IDENT_ESCAPE
+
 /*
 Copyright 2021 The Kubernetes Authors.
 

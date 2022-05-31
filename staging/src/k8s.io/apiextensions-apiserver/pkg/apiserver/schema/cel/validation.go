@@ -232,12 +232,20 @@ type validationActivation struct {
 }
 
 func NewValidationActivation(obj, oldObj interface{}, structural *schema.Structural) *validationActivation {
+	val, ok := obj.(ref.Val)
+	if !ok {
+		val = UnstructuredToVal(obj, structural)
+	}
 	va := &validationActivation{
-		self: UnstructuredToVal(obj, structural),
+		self: val,
 	}
 	if oldObj != nil {
-		va.oldSelf = UnstructuredToVal(oldObj, structural) // +k8s:verify-mutation:reason=clone
-		va.hasOldSelf = true                               // +k8s:verify-mutation:reason=clone
+		oldVal, ok := oldObj.(ref.Val)
+		if !ok {
+			oldVal = UnstructuredToVal(oldObj, structural)
+		}
+		va.oldSelf = oldVal  // +k8s:verify-mutation:reason=clone
+		va.hasOldSelf = true // +k8s:verify-mutation:reason=clone
 	}
 	return va
 }

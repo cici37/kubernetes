@@ -29,6 +29,260 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
+var (
+	unstructured = []interface{}{
+		map[string]interface{}{
+			"key": "a",
+			"val": "123 456",
+		},
+		map[string]interface{}{
+			"key": "b",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "a.1",
+			"val": "__i.1",
+		},
+		map[string]interface{}{
+			"key": "b.1",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "a__a",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "a.-/__a",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "a._a",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "a__.__a",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "a___a",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "a____a",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "a__dot__a",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "a__underscores__a",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "true",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "false",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "null",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "in",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "as",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "break",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "const",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "continue",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "else",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "for",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "function",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "if",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "import",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "let",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "loop",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "package",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "namespace",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "return",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "var",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "void",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "while",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "@",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "1up",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "👑",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "has",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "all",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "exists",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "exists_one",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "filter",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "size",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "contains",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "startsWith",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "endsWith",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "matches",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "duration",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "timestamp",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "getDate",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "getDayOfMonth",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "getDayOfWeek",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "getFullYear",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "getHours",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "getMilliseconds",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "getMinutes",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "getMonth",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "getSeconds",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "_if",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "_has",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "_int",
+			"val": "123 is before 456",
+		},
+		map[string]interface{}{
+			"key": "_anything",
+			"val": "123 is before 456",
+		},
+	}
+
+	rules = []string{
+		"!self.all(m, m.val.findAll('[0-9]+', 3) == ['123', '456'])",
+		"self.exists(m, m.val.findAll('[0-9]+', 3) == ['123', '456'])",
+	}
+)
+
 // TestValidationExpressions tests CEL integration with custom resource values and OpenAPIv3.
 func TestValidationExpressions(t *testing.T) {
 	tests := []struct {
@@ -2177,4 +2431,50 @@ func withNullablePtr(nullable bool, s schema.Structural) *schema.Structural {
 func nilInterfaceOfStringSlice() []interface{} {
 	var slice []interface{} = nil
 	return slice
+}
+
+func BenchmarkValidationExpressions(b *testing.B) {
+	mapListSchema := listType(mapTypePtr(&stringType))
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for n := 0; n < b.N; n++ {
+		for _, rule := range rules {
+			s := withRule(mapListSchema, rule)
+			celValidator := validator(&s, false, PerCallLimit)
+			if celValidator == nil {
+				b.Fatal("expected non nil validator")
+			}
+			errs, _ := celValidator.Validate(context.TODO(), field.NewPath("root"), &s,
+				unstructured, nil, RuntimeCELCostBudget)
+			for _, err := range errs {
+				b.Errorf("unexpected error: %v", err)
+			}
+		}
+	}
+}
+
+func BenchmarkValidationExpressionsWithRefVal(b *testing.B) {
+	mapListSchema := listType(mapTypePtr(&stringType))
+
+	val := UnstructuredToVal(unstructured, &mapListSchema)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for n := 0; n < b.N; n++ {
+		for _, rule := range rules {
+			s := withRule(mapListSchema, rule)
+			celValidator := validator(&s, false, PerCallLimit)
+			if celValidator == nil {
+				b.Fatal("expected non nil validator")
+			}
+			errs, _ := celValidator.Validate(context.TODO(), field.NewPath("root"), &s,
+				val, nil, RuntimeCELCostBudget)
+			for _, err := range errs {
+				b.Errorf("unexpected error: %v", err)
+			}
+		}
+	}
 }

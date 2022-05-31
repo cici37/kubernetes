@@ -663,3 +663,251 @@ func BenchmarkUnstructuredToValWithEscape(b *testing.B) {
 		}
 	}
 }
+
+func BenchmarkUnstructuredToValWithEscape2(b *testing.B) {
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for n := 0; n < b.N; n++ {
+		if val := UnstructuredToVal([]interface{}{
+			map[string]interface{}{
+				"key": "a.1",
+				"val": "__i.1",
+			},
+			map[string]interface{}{
+				"key": "b.1",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "a__a",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "a.-/__a",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "a._a",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "a__.__a",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "a___a",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "a____a",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "a__dot__a",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "a__underscores__a",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "true",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "false",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "null",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "in",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "as",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "break",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "const",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "continue",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "else",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "for",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "function",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "if",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "import",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "let",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "loop",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "package",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "namespace",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "return",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "var",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "void",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "while",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "@",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "1up",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "👑",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "has",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "all",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "exists",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "exists_one",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "filter",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "size",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "contains",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "startsWith",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "endsWith",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "matches",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "duration",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "timestamp",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "getDate",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "getDayOfMonth",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "getDayOfWeek",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "getFullYear",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "getHours",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "getMilliseconds",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "getMinutes",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "getMonth",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "getSeconds",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "_if",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "_has",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "_int",
+				"val": 2,
+			},
+			map[string]interface{}{
+				"key": "_anything",
+				"val": 2,
+			},
+		}, &mapListSchema); val == nil {
+			b.Fatal(val)
+		}
+	}
+}
