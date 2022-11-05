@@ -41,14 +41,16 @@ import (
 
 // Test_ValidateNamespace_NoParams tests a ValidatingAdmissionPolicy that validates creation of a Namespace with no params.
 func Test_ValidateNamespace_NoParams(t *testing.T) {
-	failurePolicy := admissionregistrationv1alpha1.Fail
-	ignorePolicy := admissionregistrationv1alpha1.Ignore
+	failFailurePolicy := admissionregistrationv1alpha1.Fail
+	ignoreFailurePolicy := admissionregistrationv1alpha1.Ignore
 	forbiddenReason := metav1.StatusReasonForbidden
 
 	testcases := []struct {
 		name          string
 		policy        *admissionregistrationv1alpha1.ValidatingAdmissionPolicy
 		policyBinding *admissionregistrationv1alpha1.ValidatingAdmissionPolicyBinding
+		// tests always start with failure policy Fail to validate policy enforcement
+		failurePolicy *admissionregistrationv1alpha1.FailurePolicyType
 		namespace     *v1.Namespace
 		err           string
 		failureReason metav1.StatusReason
@@ -87,7 +89,7 @@ func Test_ValidateNamespace_NoParams(t *testing.T) {
 							Expression: "object.metadata.name.endsWith('k8s')",
 						},
 					},
-					FailurePolicy: &failurePolicy,
+					FailurePolicy: &failFailurePolicy,
 				},
 			},
 			policyBinding: &admissionregistrationv1alpha1.ValidatingAdmissionPolicyBinding{
@@ -98,6 +100,7 @@ func Test_ValidateNamespace_NoParams(t *testing.T) {
 					PolicyName: "validate-namespace-suffix",
 				},
 			},
+			failurePolicy: &failFailurePolicy,
 			namespace: &v1.Namespace{
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "test-k8s",
@@ -139,7 +142,7 @@ func Test_ValidateNamespace_NoParams(t *testing.T) {
 							Expression: "object.metadata.name.endsWith('k8s')",
 						},
 					},
-					FailurePolicy: &failurePolicy,
+					FailurePolicy: &failFailurePolicy,
 				},
 			},
 			policyBinding: &admissionregistrationv1alpha1.ValidatingAdmissionPolicyBinding{
@@ -150,6 +153,7 @@ func Test_ValidateNamespace_NoParams(t *testing.T) {
 					PolicyName: "validate-namespace-suffix",
 				},
 			},
+			failurePolicy: &failFailurePolicy,
 			namespace: &v1.Namespace{
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "test-foobar",
@@ -193,7 +197,7 @@ func Test_ValidateNamespace_NoParams(t *testing.T) {
 							Reason:     &forbiddenReason,
 						},
 					},
-					FailurePolicy: &failurePolicy,
+					FailurePolicy: &failFailurePolicy,
 				},
 			},
 			policyBinding: &admissionregistrationv1alpha1.ValidatingAdmissionPolicyBinding{
@@ -204,6 +208,7 @@ func Test_ValidateNamespace_NoParams(t *testing.T) {
 					PolicyName: "validate-namespace-suffix",
 				},
 			},
+			failurePolicy: &failFailurePolicy,
 			namespace: &v1.Namespace{
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "forbidden-test-foobar",
@@ -246,7 +251,7 @@ func Test_ValidateNamespace_NoParams(t *testing.T) {
 							Expression: "request.name.endsWith('k8s')",
 						},
 					},
-					FailurePolicy: &failurePolicy,
+					FailurePolicy: &failFailurePolicy,
 				},
 			},
 			policyBinding: &admissionregistrationv1alpha1.ValidatingAdmissionPolicyBinding{
@@ -257,6 +262,7 @@ func Test_ValidateNamespace_NoParams(t *testing.T) {
 					PolicyName: "validate-namespace-suffix",
 				},
 			},
+			failurePolicy: &failFailurePolicy,
 			namespace: &v1.Namespace{
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "test-k8s",
@@ -298,7 +304,7 @@ func Test_ValidateNamespace_NoParams(t *testing.T) {
 							Expression: "request.name.endsWith('k8s')",
 						},
 					},
-					FailurePolicy: &failurePolicy,
+					FailurePolicy: &failFailurePolicy,
 				},
 			},
 			policyBinding: &admissionregistrationv1alpha1.ValidatingAdmissionPolicyBinding{
@@ -309,6 +315,7 @@ func Test_ValidateNamespace_NoParams(t *testing.T) {
 					PolicyName: "validate-namespace-suffix",
 				},
 			},
+			failurePolicy: &failFailurePolicy,
 			namespace: &v1.Namespace{
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "test-k8s",
@@ -350,7 +357,7 @@ func Test_ValidateNamespace_NoParams(t *testing.T) {
 							Expression: "object.nonExistentProperty == 'someval'",
 						},
 					},
-					FailurePolicy: &ignorePolicy,
+					FailurePolicy: &failFailurePolicy,
 				},
 			},
 			policyBinding: &admissionregistrationv1alpha1.ValidatingAdmissionPolicyBinding{
@@ -361,6 +368,7 @@ func Test_ValidateNamespace_NoParams(t *testing.T) {
 					PolicyName: "validate-namespace-suffix",
 				},
 			},
+			failurePolicy: &ignoreFailurePolicy,
 			namespace: &v1.Namespace{
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "test-k8s",
@@ -402,7 +410,7 @@ func Test_ValidateNamespace_NoParams(t *testing.T) {
 							Expression: "object.nonExistentProperty == 'someval'",
 						},
 					},
-					FailurePolicy: &failurePolicy,
+					FailurePolicy: &failFailurePolicy,
 				},
 			},
 			policyBinding: &admissionregistrationv1alpha1.ValidatingAdmissionPolicyBinding{
@@ -413,6 +421,7 @@ func Test_ValidateNamespace_NoParams(t *testing.T) {
 					PolicyName: "validate-namespace-suffix",
 				},
 			},
+			failurePolicy: &failFailurePolicy,
 			namespace: &v1.Namespace{
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "test-k8s",
@@ -441,7 +450,8 @@ func Test_ValidateNamespace_NoParams(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if _, err := client.AdmissionregistrationV1alpha1().ValidatingAdmissionPolicies().Create(context.TODO(), testcase.policy, metav1.CreateOptions{}); err != nil {
+			var validatingAdmissionPolicy *admissionregistrationv1alpha1.ValidatingAdmissionPolicy
+			if validatingAdmissionPolicy, err = client.AdmissionregistrationV1alpha1().ValidatingAdmissionPolicies().Create(context.TODO(), testcase.policy, metav1.CreateOptions{}); err != nil {
 				t.Fatal(err)
 			}
 
@@ -451,6 +461,28 @@ func Test_ValidateNamespace_NoParams(t *testing.T) {
 
 			// TODO: add retry logic instead
 			time.Sleep(time.Second)
+
+			// If successful admission is expected, we attempt to create a Namespace that we know should fail admission
+			// to verify that the policy is being enforced to avoid false positives.
+			if testcase.err == "" {
+				deniedNamespace := &v1.Namespace{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "should-always-fail",
+					},
+				}
+
+				_, err = client.CoreV1().Namespaces().Create(context.TODO(), deniedNamespace, metav1.CreateOptions{})
+				if err == nil {
+					t.Fatalf("validating admission policy is not being enforced")
+				}
+
+				checkFailureReason(t, err, metav1.StatusReasonInvalid)
+			}
+
+			validatingAdmissionPolicy.Spec.FailurePolicy = testcase.failurePolicy
+			if _, err := client.AdmissionregistrationV1alpha1().ValidatingAdmissionPolicies().Update(context.TODO(), validatingAdmissionPolicy, metav1.UpdateOptions{}); err != nil {
+				t.Fatal(err)
+			}
 
 			_, err = client.CoreV1().Namespaces().Create(context.TODO(), testcase.namespace, metav1.CreateOptions{})
 			if err == nil && testcase.err == "" {
@@ -484,7 +516,6 @@ func Test_ValidateNamespace_NoParams(t *testing.T) {
 // using ConfigMap as a param reference.
 func Test_ValidateNamespace_WithConfigMapParams(t *testing.T) {
 	failurePolicy := admissionregistrationv1alpha1.Fail
-	// ignorePolicy := admissionregistrationv1alpha1.Ignore
 
 	testcases := []struct {
 		name          string
@@ -658,7 +689,7 @@ func Test_ValidateNamespace_WithConfigMapParams(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if _, err := client.AdmissionregistrationV1alpha1().ValidatingAdmissionPolicies().Create(context.TODO(), testcase.policy, metav1.CreateOptions{}); err != nil {
+			if _, err = client.AdmissionregistrationV1alpha1().ValidatingAdmissionPolicies().Create(context.TODO(), testcase.policy, metav1.CreateOptions{}); err != nil {
 				t.Fatal(err)
 			}
 
@@ -668,6 +699,23 @@ func Test_ValidateNamespace_WithConfigMapParams(t *testing.T) {
 
 			// TODO: add retry logic instead
 			time.Sleep(time.Second)
+
+			// If successful admission is expected, we attempt to create a Namespace that we know should fail admission
+			// to verify that the policy is being enforced to avoid false positives.
+			if testcase.err == "" {
+				deniedNamespace := &v1.Namespace{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "should-always-fail",
+					},
+				}
+
+				_, err = client.CoreV1().Namespaces().Create(context.TODO(), deniedNamespace, metav1.CreateOptions{})
+				if err == nil {
+					t.Fatalf("validating admission policy is not being enforced")
+				}
+
+				checkFailureReason(t, err, metav1.StatusReasonInvalid)
+			}
 
 			_, err = client.CoreV1().Namespaces().Create(context.TODO(), testcase.namespace, metav1.CreateOptions{})
 			if err == nil && testcase.err == "" {
