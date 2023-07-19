@@ -67,6 +67,8 @@ type CompilationResult struct {
 	MessageExpressionMaxCost uint64
 	// NormalizedRuleFieldPath represents the relative fieldPath specified by user after normalization.
 	NormalizedRuleFieldPath string
+	// NormalizedRuleFieldPathError represents an error encountered during parsing fieldPath.
+	NormalizedRuleFieldPathError *apiservercel.Error
 }
 
 // EnvLoader delegates the decision of which CEL environment to use for each expression.
@@ -251,6 +253,7 @@ func compileRule(s *schema.Structural, rule apiextensions.ValidationRule, envSet
 	if rule.FieldPath != "" {
 		validFieldPath, err := ValidFieldPath(rule.FieldPath, nil, s)
 		if err == nil {
+			compilationResult.NormalizedRuleFieldPathError = &apiservercel.Error{Type: apiservercel.ErrorTypeInvalid, Detail: "failed parsing fieldPath: " + err.Error()}
 			compilationResult.NormalizedRuleFieldPath = validFieldPath.String()
 		}
 	}
