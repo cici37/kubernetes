@@ -1197,7 +1197,7 @@ var defaultKubernetesFeatureGates = map[featuregate.Feature]featuregate.FeatureS
 
 	genericfeatures.APIResponseCompression: {Default: true, PreRelease: featuregate.Beta},
 
-	genericfeatures.ValidatingAdmissionPolicy: {Default: false, PreRelease: featuregate.Alpha},
+	genericfeatures.ValidatingAdmissionPolicy: {Default: false, PreRelease: featuregate.Beta},
 
 	genericfeatures.CustomResourceValidationExpressions: {Default: true, PreRelease: featuregate.Beta},
 
