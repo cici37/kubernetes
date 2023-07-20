@@ -390,21 +390,32 @@ func (c *celAdmissionController) Validate(
 
 	if len(deniedDecisions) > 0 {
 		// TODO: refactor admission.NewForbidden so the name extraction is reusable but the code/reason is customizable
-		var message string
 		deniedDecision := deniedDecisions[0]
-		if deniedDecision.Binding != nil {
-			message = fmt.Sprintf("ValidatingAdmissionPolicy '%s' with binding '%s' denied request: %s", deniedDecision.Definition.Name, deniedDecision.Binding.Name, deniedDecision.Message)
-		} else {
-			message = fmt.Sprintf("ValidatingAdmissionPolicy '%s' denied request: %s", deniedDecision.Definition.Name, deniedDecision.Message)
+		var causes []metav1.StatusCause
+		for _, decision := range deniedDecisions {
+			var message string
+			if decision.Binding != nil {
+				message = fmt.Sprintf("ValidatingAdmissionPolicy '%s' with binding '%s' denied request: %s", decision.Definition.Name, decision.Binding.Name, decision.Message)
+			} else {
+				message = fmt.Sprintf("ValidatingAdmissionPolicy '%s' denied request: %s", decision.Definition.Name, decision.Message)
+			}
+
+			//!TODO: does it make sense to use decision.Reason for Cause.Type?
+			causes = append(causes,
+				metav1.StatusCause{
+					Message: message,
+				},
+			)
 		}
-		err := admission.NewForbidden(a, errors.New(message)).(*k8serrors.StatusError)
+
+		err := admission.NewForbidden(a, errors.New(causes[0].Message)).(*k8serrors.StatusError)
 		reason := deniedDecision.Reason
 		if len(reason) == 0 {
 			reason = metav1.StatusReasonInvalid
 		}
 		err.ErrStatus.Reason = reason
 		err.ErrStatus.Code = reasonToCode(reason)
-		err.ErrStatus.Details.Causes = append(err.ErrStatus.Details.Causes, metav1.StatusCause{Message: message})
+		err.ErrStatus.Details.Causes = causes
 		return err
 	}
 	return nil
