@@ -16,6 +16,8 @@ limitations under the License.
 
 package v1beta1
 
+// FieldErrorReason is a machine-readable value providing more detail about why a field failed the validation.
+// +enum
 type FieldErrorReason string
 
 const (

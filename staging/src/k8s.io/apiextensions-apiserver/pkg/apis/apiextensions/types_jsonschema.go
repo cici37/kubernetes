@@ -16,6 +16,8 @@ limitations under the License.
 
 package apiextensions
 
+// FieldErrorReason is a machine-readable value providing more detail about why a field failed the validation.
+// +enum
 type FieldErrorReason string
 
 const (

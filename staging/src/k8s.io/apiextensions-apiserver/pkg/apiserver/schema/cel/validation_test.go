@@ -2592,8 +2592,8 @@ func TestMessageExpression(t *testing.T) {
 }
 
 func TestReasonAndFldPath(t *testing.T) {
-	forbiddenReason := func() *apiextensions.FieldErrorReason {
-		r := apiextensions.ErrorReasonForbidden
+	forbiddenReason := func() *apiextensions.FieldValueErrorReason {
+		r := apiextensions.FieldValueForbidden
 		return &r
 	}()
 	tests := []struct {
@@ -3313,7 +3313,7 @@ func withRuleMessageAndMessageExpression(s schema.Structural, rule, message, mes
 	return s
 }
 
-func withReasonAndFldPath(s schema.Structural, rule, jsonPath string, reason *apiextensions.FieldErrorReason) schema.Structural {
+func withReasonAndFldPath(s schema.Structural, rule, jsonPath string, reason *apiextensions.FieldValueErrorReason) schema.Structural {
 	s.Extensions.XValidations = apiextensions.ValidationRules{
 		{
 			Rule:      rule,
