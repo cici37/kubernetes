@@ -79,6 +79,7 @@ func (v validationMatch) matches(err *field.Error) bool {
 func strPtr(s string) *string { return &s }
 
 func TestValidateCustomResourceDefinition(t *testing.T) {
+	fieldInternalError := "InternalError"
 	singleVersionList := []apiextensions.CustomResourceDefinitionVersion{
 		{
 			Name:    "version",
@@ -4089,11 +4090,8 @@ func TestValidateCustomResourceDefinition(t *testing.T) {
 							Type: "object",
 							XValidations: apiextensions.ValidationRules{
 								{
-									Rule: "self.a > 0",
-									Reason: func() *field.ErrorType {
-										r := field.ErrorTypeInternal
-										return &r
-									}(),
+									Rule:      "self.a > 0",
+									Reason:    &fieldInternalError,
 									FieldPath: ".a",
 								},
 							},
