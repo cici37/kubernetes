@@ -2592,7 +2592,10 @@ func TestMessageExpression(t *testing.T) {
 }
 
 func TestReasonAndFldPath(t *testing.T) {
-	forbiddenReason := string(field.ErrorTypeForbidden)
+	forbiddenReason := func() *apiextensions.FieldErrorReason {
+		r := apiextensions.ErrorReasonForbidden
+		return &r
+	}()
 	tests := []struct {
 		name      string
 		schema    *schema.Structural
@@ -2607,7 +2610,7 @@ func TestReasonAndFldPath(t *testing.T) {
 				},
 			},
 			schema: withRulePtr(objectTypePtr(map[string]schema.Structural{
-				"f": withReasonAndFldPath(objectType(map[string]schema.Structural{"m": integerType}), "self.m == 2", "", &forbiddenReason),
+				"f": withReasonAndFldPath(objectType(map[string]schema.Structural{"m": integerType}), "self.m == 2", "", forbiddenReason),
 			}), "1 == 1"),
 			errorType: field.ErrorTypeForbidden,
 			errors:    []string{"root.f: Forbidden"},
@@ -2631,7 +2634,7 @@ func TestReasonAndFldPath(t *testing.T) {
 				},
 			},
 			schema: withRulePtr(objectTypePtr(map[string]schema.Structural{
-				"f": withReasonAndFldPath(objectType(map[string]schema.Structural{"m": integerType}), "self.m == 2", ".m", &forbiddenReason),
+				"f": withReasonAndFldPath(objectType(map[string]schema.Structural{"m": integerType}), "self.m == 2", ".m", forbiddenReason),
 			}), "1 == 1"),
 			errorType: field.ErrorTypeForbidden,
 			errors:    []string{"root.f.m: Forbidden"},
@@ -3310,7 +3313,7 @@ func withRuleMessageAndMessageExpression(s schema.Structural, rule, message, mes
 	return s
 }
 
-func withReasonAndFldPath(s schema.Structural, rule, jsonPath string, reason *string) schema.Structural {
+func withReasonAndFldPath(s schema.Structural, rule, jsonPath string, reason *apiextensions.FieldErrorReason) schema.Structural {
 	s.Extensions.XValidations = apiextensions.ValidationRules{
 		{
 			Rule:      rule,

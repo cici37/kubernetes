@@ -16,6 +16,26 @@ limitations under the License.
 
 package apiextensions
 
+type FieldErrorReason string
+
+const (
+	// ErrorReasonRequired is used to report required values that are not
+	// provided (e.g. empty strings, null values, or empty arrays).  See
+	// Required().
+	ErrorReasonRequired FieldErrorReason = "FieldValueRequired"
+	// ErrorReasonDuplicate is used to report collisions of values that must be
+	// unique (e.g. unique IDs).  See Duplicate().
+	ErrorReasonDuplicate FieldErrorReason = "FieldValueDuplicate"
+	// ErrorReasonInvalid is used to report malformed values (e.g. failed regex
+	// match, too long, out of bounds).  See Invalid().
+	ErrorReasonInvalid FieldErrorReason = "FieldValueInvalid"
+	// ErrorReasonForbidden is used to report valid (as per formatting rules)
+	// values which would be accepted under some conditions, but which are not
+	// permitted by the current conditions (such as security policy).  See
+	// Forbidden().
+	ErrorReasonForbidden FieldErrorReason = "FieldValueForbidden"
+)
+
 // JSONSchemaProps is a JSON-Schema following Specification Draft 4 (http://json-schema.org/).
 type JSONSchemaProps struct {
 	ID                   string
@@ -214,7 +234,7 @@ type ValidationRule struct {
 	// If not set, default to use "FieldValueInvalid".
 	// All future added reasons must be accepted by clients when reading this value.
 	// +optional
-	Reason *string
+	Reason *FieldErrorReason
 	// fieldPath represents the field path returned when the validation fails.
 	// It must be a relative JSON path (i.e. with array notation) scoped to the location of this x-kubernetes-validations extension in the schema and refer to an existing field.
 	// e.g. when validation checks if a specific attribute `foo` under a map `testMap`, the fieldPath could be set to `.testMap.foo`
