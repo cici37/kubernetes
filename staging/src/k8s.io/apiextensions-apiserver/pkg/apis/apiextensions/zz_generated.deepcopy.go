@@ -533,7 +533,7 @@ func (in *ValidationRule) DeepCopyInto(out *ValidationRule) {
 	*out = *in
 	if in.Reason != nil {
 		in, out := &in.Reason, &out.Reason
-		*out = new(string)
+		*out = new(FieldErrorReason)
 		**out = **in
 	}
 	return
