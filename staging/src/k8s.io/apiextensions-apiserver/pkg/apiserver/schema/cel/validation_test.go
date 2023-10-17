@@ -274,7 +274,7 @@ func TestValidationExpressions(t *testing.T) {
 			},
 			errors: map[string]string{
 				// Invalid regex with a string constant regex pattern is compile time error
-				"self.val1.matches(')')": "compile error: program instantiation failed: error parsing regexp: unexpected ): `)`",
+				"self.val1.matches(')')": "compile error: compilation failed: ERROR: <input>:1:19: invalid matches argument",
 			},
 		},
 		{name: "escaped strings",
@@ -319,6 +319,11 @@ func TestValidationExpressions(t *testing.T) {
 				"self.val1.getMilliseconds() == 3723004",
 				"type(self.val1) == google.protobuf.Duration",
 			},
+			errors: map[string]string{
+				"duration('1')":                      "invalid duration argument",
+				"duration('1d')":                     "invalid duration argument",
+				"duration('1us') < duration('1nns')": "invalid duration argument",
+			},
 		},
 		{name: "date format",
 			obj:    objs("1997-07-16", "1997-07-16"),
@@ -346,6 +351,11 @@ func TestValidationExpressions(t *testing.T) {
 				"self.val1.getMilliseconds('01:00') == 10",
 				"self.val1.getHours('UTC') == 18", // TZ in string is 1hr off of UTC
 				"type(self.val1) == google.protobuf.Timestamp",
+			},
+			errors: map[string]string{
+				"timestamp('1000-00-00T00:00:00Z')":  "invalid timestamp",
+				"timestamp('1000-01-01T00:00:00ZZ')": "invalid timestamp",
+				"timestamp(-62135596801)":            "invalid timestamp",
 			},
 		},
 		{name: "enums",
@@ -696,6 +706,21 @@ func TestValidationExpressions(t *testing.T) {
 				"size(self.set.filter(e, e%2 == 0)) == 2",
 				"self.set.map(e, e * 20).filter(e, e > 50).exists_one(e, e == 60)",
 				"size(self.set) == 5",
+			},
+		},
+		{name: "Set access",
+			obj: map[string]interface{}{
+				"set": []interface{}{1, 2, 2, 3, 4, 5},
+			},
+			schema: objectTypePtr(map[string]schema.Structural{
+				"set": listType(&integerType),
+			}),
+			valid: []string{
+				"sets.contains(self.set, [1])",
+				"!sets.contains(self.set, [100])",
+				"sets.equivalent(self.set, [1, 2, 2, 3, 4, 5])",
+				"sets.equivalent(self.set, [1, 2, 3, 4, 5])",
+				"sets.intersects(self.set, [4, 5, 6, 7])",
 			},
 		},
 		{name: "typemeta and objectmeta access specified",
@@ -1747,6 +1772,7 @@ func TestValidationExpressions(t *testing.T) {
 				"self.str.find(')') == ''":       "compile error: program instantiation failed: error parsing regexp: unexpected ): `)`",
 				"self.str.findAll(')') == []":    "compile error: program instantiation failed: error parsing regexp: unexpected ): `)`",
 				"self.str.findAll(')', 1) == []": "compile error: program instantiation failed: error parsing regexp: unexpected ): `)`",
+				"self.str.matches('x++')":        "invalid matches argument",
 			},
 		},
 		{name: "URL parsing",
