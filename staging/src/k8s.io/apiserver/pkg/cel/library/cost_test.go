@@ -130,6 +130,27 @@ func TestListsCost(t *testing.T) {
 	}
 }
 
+func TestSetsCost(t *testing.T) {
+	cases := []struct {
+		name                string
+		expr                string
+		expectEstimatedCost checker.CostEstimate
+		expectRuntimeCost   uint64
+	}{
+		{
+			name:                "sets.contains",
+			expr:                `sets.contains(['a', 'v', 'c'], ['a'])`,
+			expectEstimatedCost: checker.CostEstimate{Min: 21, Max: 21},
+			expectRuntimeCost:   21,
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			testCost(t, tc.expr, tc.expectEstimatedCost, tc.expectRuntimeCost)
+		})
+	}
+}
+
 func TestIndexOfCost(t *testing.T) {
 	cases := []struct {
 		opts  []string
@@ -536,6 +557,7 @@ func testCost(t *testing.T, expr string, expectEsimatedCost checker.CostEstimate
 		Lists(),
 		Authz(),
 		Quantity(),
+		ext.Sets(),
 	)
 	if err != nil {
 		t.Fatalf("%v", err)
