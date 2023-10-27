@@ -39,7 +39,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/golang/protobuf v1.5.3
 	github.com/google/cadvisor v0.47.3
-	github.com/google/cel-go v0.17.6
+	github.com/google/cel-go v0.7.4-0.20231027062413-dddf2325318b
 	github.com/google/gnostic-models v0.6.8
 	github.com/google/go-cmp v0.5.9
 	github.com/google/gofuzz v1.2.0
@@ -248,6 +248,7 @@ require (
 )
 
 replace (
+	github.com/google/cel-go => github.com/cici37/cel-go v0.7.4-0.20231027062413-dddf2325318b
 	k8s.io/api => ./staging/src/k8s.io/api
 	k8s.io/apiextensions-apiserver => ./staging/src/k8s.io/apiextensions-apiserver
 	k8s.io/apimachinery => ./staging/src/k8s.io/apimachinery

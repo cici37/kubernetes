@@ -11,7 +11,7 @@ require (
 	github.com/evanphx/json-patch v4.12.0+incompatible
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gogo/protobuf v1.3.2
-	github.com/google/cel-go v0.17.6
+	github.com/google/cel-go v0.7.4-0.20231027062413-dddf2325318b
 	github.com/google/gnostic-models v0.6.8
 	github.com/google/go-cmp v0.5.9
 	github.com/google/gofuzz v1.2.0
@@ -127,6 +127,7 @@ require (
 )
 
 replace (
+	github.com/google/cel-go => github.com/cici37/cel-go v0.7.4-0.20231027062413-dddf2325318b
 	k8s.io/api => ../api
 	k8s.io/apimachinery => ../apimachinery
 	k8s.io/apiserver => ../apiserver

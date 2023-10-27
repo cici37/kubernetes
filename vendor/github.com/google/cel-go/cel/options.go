@@ -23,6 +23,7 @@ import (
 	"google.golang.org/protobuf/reflect/protoregistry"
 	"google.golang.org/protobuf/types/dynamicpb"
 
+	"github.com/google/cel-go/checker"
 	"github.com/google/cel-go/common/containers"
 	"github.com/google/cel-go/common/functions"
 	"github.com/google/cel-go/common/types"
@@ -469,6 +470,16 @@ func InterruptCheckFrequency(checkFrequency uint) ProgramOption {
 	}
 }
 
+// CostTrackerOptions configures a set of options for cost-tracking.
+//
+// Note, CostTrackerOptions is a no-op unless CostTracking is also enabled.
+func CostTrackerOptions(costOpts ...interpreter.CostTrackerOption) ProgramOption {
+	return func(p *prog) (*prog, error) {
+		p.costOptions = append(p.costOptions, costOpts...)
+		return p, nil
+	}
+}
+
 // CostTracking enables cost tracking and registers a ActualCostEstimator that can optionally provide a runtime cost estimate for any function calls.
 func CostTracking(costEstimator interpreter.ActualCostEstimator) ProgramOption {
 	return func(p *prog) (*prog, error) {
@@ -624,6 +635,13 @@ func ParserRecursionLimit(limit int) EnvOption {
 func ParserExpressionSizeLimit(limit int) EnvOption {
 	return func(e *Env) (*Env, error) {
 		e.prsrOpts = append(e.prsrOpts, parser.ExpressionSizeCodePointLimit(limit))
+		return e, nil
+	}
+}
+
+func CostEstimatorOptions(costOpts ...checker.CostOption) EnvOption {
+	return func(e *Env) (*Env, error) {
+		e.costOptions = append(e.costOptions, costOpts...)
 		return e, nil
 	}
 }

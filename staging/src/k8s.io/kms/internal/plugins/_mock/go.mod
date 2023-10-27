@@ -25,3 +25,5 @@ replace (
 	k8s.io/apimachinery => ../../../../apimachinery
 	k8s.io/kms => ../../../../kms
 )
+
+replace github.com/google/cel-go => github.com/cici37/cel-go v0.7.4-0.20231027062413-dddf2325318b
