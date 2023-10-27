@@ -55,3 +55,5 @@ replace (
 	k8s.io/apimachinery => ../../apimachinery
 	k8s.io/client-go => ../../client-go
 )
+
+replace github.com/google/cel-go => github.com/TristonianJones/cel-go v0.0.0-20231026223125-51e493665cf2
