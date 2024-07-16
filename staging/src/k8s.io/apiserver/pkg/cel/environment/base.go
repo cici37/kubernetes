@@ -18,6 +18,7 @@ package environment
 
 import (
 	"fmt"
+	celpkg "k8s.io/apiserver/pkg/cel"
 	"strconv"
 	"sync"
 
@@ -51,6 +52,13 @@ func DefaultCompatibilityVersion() *version.Version {
 		effectiveVer = utilversion.DefaultKubeEffectiveVersion()
 	}
 	return effectiveVer.MinCompatibilityVersion()
+}
+
+func setFlag(e *cel.Env) (*cel.Env, error) {
+	var declTypeProvider celpkg.DeclTypeProvider
+	declTypeProvider := e.TypeProvider().(celpkg.DeclTypeProvider)
+	declTypeProvider.SetRecognizeKeywordAsFieldName(true)
+	return e, nil
 }
 
 var baseOpts = append(baseOptsWithoutStrictCost, StrictCostOpt)
@@ -144,6 +152,7 @@ var baseOptsWithoutStrictCost = []VersionedOptions{
 		IntroducedVersion: version.MajorMinor(1, 31),
 		EnvOptions: []cel.EnvOption{
 			library.Format(),
+			setFlag,
 		},
 	},
 }
