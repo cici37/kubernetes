@@ -452,7 +452,7 @@ func (rt *DeclTypeProvider) FindFieldType(typeName, fieldName string) (*ref.Fiel
 	}
 
 	f, found := st.Fields[fieldName]
-	if !found {
+	if !found && celReservedSymbols.Has(fieldName) {
 		f, found = st.Fields["__"+fieldName+"__"]
 	}
 

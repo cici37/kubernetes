@@ -8544,6 +8544,58 @@ func TestValidateCustomResourceDefinitionValidation(t *testing.T) {
 						{
 							Rule: "self.__namespace__ > 0",
 						},
+						// reserved keywords `true`, `false`, `null` and `in` are not supported
+						{
+							Rule: "self.if > 0",
+						},
+						{
+							Rule: "self.namespace > 0",
+						},
+						{
+							Rule: "self.as > 0",
+						},
+						{
+							Rule: "self.break > 0",
+						},
+						{
+							Rule: "self.const > 0",
+						},
+						{
+							Rule: "self.continue > 0",
+						},
+						{
+							Rule: "self.else > 0",
+						},
+						{
+							Rule: "self.for > 0",
+						},
+						{
+							Rule: "self.function > 0",
+						},
+						{
+							Rule: "self.import > 0",
+						},
+						{
+							Rule: "self.let > 0",
+						},
+						{
+							Rule: "self.loop > 0",
+						},
+						{
+							Rule: "self.package > 0",
+						},
+						{
+							Rule: "self.return > 0",
+						},
+						{
+							Rule: "self.var > 0",
+						},
+						{
+							Rule: "self.void > 0",
+						},
+						{
+							Rule: "self.while > 0",
+						},
 						{
 							Rule: "self.self > 0",
 						},
@@ -8556,6 +8608,51 @@ func TestValidateCustomResourceDefinitionValidation(t *testing.T) {
 							Type: "integer",
 						},
 						"namespace": {
+							Type: "integer",
+						},
+						"as": {
+							Type: "integer",
+						},
+						"break": {
+							Type: "integer",
+						},
+						"const": {
+							Type: "integer",
+						},
+						"continue": {
+							Type: "integer",
+						},
+						"else": {
+							Type: "integer",
+						},
+						"for": {
+							Type: "integer",
+						},
+						"function": {
+							Type: "integer",
+						},
+						"import": {
+							Type: "integer",
+						},
+						"let": {
+							Type: "integer",
+						},
+						"loop": {
+							Type: "integer",
+						},
+						"package": {
+							Type: "integer",
+						},
+						"return": {
+							Type: "integer",
+						},
+						"var": {
+							Type: "integer",
+						},
+						"void": {
+							Type: "integer",
+						},
+						"while": {
 							Type: "integer",
 						},
 						"self": {
