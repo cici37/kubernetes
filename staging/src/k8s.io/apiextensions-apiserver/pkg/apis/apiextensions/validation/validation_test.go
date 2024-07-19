@@ -8544,6 +8544,7 @@ func TestValidateCustomResourceDefinitionValidation(t *testing.T) {
 						{
 							Rule: "self.__namespace__ > 0",
 						},
+						// The test cases below should be supported in 1.32
 						// reserved keywords `true`, `false`, `null` and `in` are not supported
 						{
 							Rule: "self.if > 0",
@@ -8666,6 +8667,26 @@ func TestValidateCustomResourceDefinitionValidation(t *testing.T) {
 			},
 			opts: validationOptions{
 				requireStructuralSchema: true,
+			},
+			// remove the expectedErrors in 1.32 after default compatible env version updated
+			expectedErrors: []validationMatch{
+				invalid("spec.validation.openAPIV3Schema.x-kubernetes-validations[2].rule"),
+				invalid("spec.validation.openAPIV3Schema.x-kubernetes-validations[3].rule"),
+				invalid("spec.validation.openAPIV3Schema.x-kubernetes-validations[4].rule"),
+				invalid("spec.validation.openAPIV3Schema.x-kubernetes-validations[5].rule"),
+				invalid("spec.validation.openAPIV3Schema.x-kubernetes-validations[6].rule"),
+				invalid("spec.validation.openAPIV3Schema.x-kubernetes-validations[7].rule"),
+				invalid("spec.validation.openAPIV3Schema.x-kubernetes-validations[8].rule"),
+				invalid("spec.validation.openAPIV3Schema.x-kubernetes-validations[9].rule"),
+				invalid("spec.validation.openAPIV3Schema.x-kubernetes-validations[10].rule"),
+				invalid("spec.validation.openAPIV3Schema.x-kubernetes-validations[11].rule"),
+				invalid("spec.validation.openAPIV3Schema.x-kubernetes-validations[12].rule"),
+				invalid("spec.validation.openAPIV3Schema.x-kubernetes-validations[13].rule"),
+				invalid("spec.validation.openAPIV3Schema.x-kubernetes-validations[14].rule"),
+				invalid("spec.validation.openAPIV3Schema.x-kubernetes-validations[15].rule"),
+				invalid("spec.validation.openAPIV3Schema.x-kubernetes-validations[16].rule"),
+				invalid("spec.validation.openAPIV3Schema.x-kubernetes-validations[17].rule"),
+				invalid("spec.validation.openAPIV3Schema.x-kubernetes-validations[18].rule"),
 			},
 		},
 		{

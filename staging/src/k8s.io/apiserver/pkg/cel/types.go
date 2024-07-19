@@ -348,9 +348,14 @@ func NewDeclTypeProvider(rootTypes ...*DeclType) *DeclTypeProvider {
 // DeclTypeProvider extends the CEL ref.TypeProvider interface and provides an Open API Schema-based
 // type-system.
 type DeclTypeProvider struct {
-	registeredTypes map[string]*DeclType
-	typeProvider    ref.TypeProvider
-	typeAdapter     ref.TypeAdapter
+	registeredTypes             map[string]*DeclType
+	typeProvider                ref.TypeProvider
+	typeAdapter                 ref.TypeAdapter
+	recognizeKeywordAsFieldName bool
+}
+
+func (rt *DeclTypeProvider) SetRecognizeKeywordAsFieldName(recognize bool) {
+	rt.recognizeKeywordAsFieldName = recognize
 }
 
 func (rt *DeclTypeProvider) EnumValue(enumName string) ref.Val {
@@ -452,7 +457,7 @@ func (rt *DeclTypeProvider) FindFieldType(typeName, fieldName string) (*ref.Fiel
 	}
 
 	f, found := st.Fields[fieldName]
-	if !found && celReservedSymbols.Has(fieldName) {
+	if rt.recognizeKeywordAsFieldName && !found && celReservedSymbols.Has(fieldName) {
 		f, found = st.Fields["__"+fieldName+"__"]
 	}
 

@@ -251,6 +251,42 @@ func TestBaseEnvironment(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "recognizeKeywordAsFieldName disabled",
+			typeVersionCombinations: []envTypeAndVersion{
+				{version.MajorMinor(1, 30), NewExpressions},
+				// always enabled for StoredExpressions
+			},
+			invalidExpressions: []string{"widget.namespace == 'buzz'"},
+			activation:         map[string]any{"widget": map[string]any{"namespace": "buzz"}},
+			opts: []VersionedOptions{
+				{
+					IntroducedVersion: version.MajorMinor(1, 28),
+					DeclTypes:         []*apiservercel.DeclType{widgetsType},
+					EnvOptions: []cel.EnvOption{
+						cel.Variable("widget", cel.ObjectType("Widget")),
+					},
+				},
+			},
+		},
+		{
+			name: "recognizeKeywordAsFieldName enabled",
+			typeVersionCombinations: []envTypeAndVersion{
+				{version.MajorMinor(1, 31), NewExpressions},
+				{version.MajorMinor(1, 30), StoredExpressions},
+			},
+			validExpressions: []string{"widget.namespace == 'buzz'"},
+			activation:       map[string]any{"widget": map[string]any{"namespace": "buzz"}},
+			opts: []VersionedOptions{
+				{
+					IntroducedVersion: version.MajorMinor(1, 28),
+					DeclTypes:         []*apiservercel.DeclType{widgetsType},
+					EnvOptions: []cel.EnvOption{
+						cel.Variable("widget", cel.ObjectType("Widget")),
+					},
+				},
+			},
+		},
 	}
 
 	for _, tc := range cases {
