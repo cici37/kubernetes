@@ -18,6 +18,7 @@ package validation
 
 import (
 	"fmt"
+	mutatingadmissionpolicy "k8s.io/apiserver/pkg/admission/plugin/policy/mutating"
 	"reflect"
 	"regexp"
 	"strings"
@@ -322,12 +323,12 @@ func findValidatingPolicyPreexistingExpressions(validatingPolicy *admissionregis
 	return preexisting
 }
 
-func findMutatingPolicyPreexistingExpressions(validatingPolicy *admissionregistration.MutatingAdmissionPolicy) preexistingExpressions {
+func findMutatingPolicyPreexistingExpressions(mutatingPolicy *admissionregistration.MutatingAdmissionPolicy) preexistingExpressions {
 	preexisting := newPreexistingExpressions()
-	for _, mc := range validatingPolicy.Spec.MatchConditions {
+	for _, mc := range mutatingPolicy.Spec.MatchConditions {
 		preexisting.matchConditionExpressions.Insert(mc.Expression)
 	}
-	for _, v := range validatingPolicy.Spec.Mutations {
+	for _, v := range mutatingPolicy.Spec.Mutations {
 		preexisting.validationExpressions.Insert(v.Expression)
 		if len(v.MessageExpression) > 0 {
 			preexisting.validationMessageExpressions.Insert(v.MessageExpression)
@@ -1456,17 +1457,16 @@ func validateMutation(compiler plugincel.Compiler, m *admissionregistration.Muta
 
 // TODO: Add mutation compilation check
 func validateMutationExpression(compiler plugincel.Compiler, expression string, hasParams bool, opts validationOptions, fldPath *field.Path) field.ErrorList {
-	// envType := environment.NewExpressions
-	// if opts.preexistingExpressions.validationExpressions.Has(expression) {
-	//	envType = environment.StoredExpressions
-	// }
-	// return validateCELCondition(compiler, &validatingadmissionpolicy.ValidationCondition{
-	//	Expression: expression,
-	// }, plugincel.OptionalVariableDeclarations{
-	//	HasParams:     hasParams,
-	//	HasAuthorizer: false,
-	// }, envType, fldPath)
-	return nil
+	envType := environment.NewExpressions
+	if opts.preexistingExpressions.validationExpressions.Has(expression) {
+		envType = environment.StoredExpressions
+	}
+	return validateCELCondition(compiler, &mutatingadmissionpolicy.MutationCondition{
+		Expression: expression,
+	}, plugincel.OptionalVariableDeclarations{
+		HasParams:     hasParams,
+		HasAuthorizer: false,
+	}, envType, fldPath)
 }
 
 // ValidateMutatingAdmissionPolicyBinding validates a MutatingAdmissionPolicyBinding before create.
