@@ -3166,6 +3166,10 @@ func TestEnableEmulationVersion(t *testing.T) {
 			expectedStatusCode: 200,
 		},
 		{
+			path:               "/apis/testonly/v1/",
+			expectedStatusCode: 200,
+		},
+		{
 			path:               "/apis/apps/v1/deployments",
 			expectedStatusCode: 200,
 		},
