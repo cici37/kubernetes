@@ -42,14 +42,10 @@ import (
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	apiruntime "k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/runtime/serializer"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/version"
 	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/apiserver/pkg/registry/rest"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	serveroptions "k8s.io/apiserver/pkg/server/options"
 	"k8s.io/apiserver/pkg/storage/storagebackend"
@@ -72,66 +68,6 @@ import (
 	"k8s.io/kubernetes/cmd/kube-apiserver/app"
 	"k8s.io/kubernetes/cmd/kube-apiserver/app/options"
 )
-
-const (
-	testOnlyGroupName = "testonly"
-)
-
-var (
-	v1GroupVersion = schema.GroupVersion{Group: "", Version: "v1"}
-)
-
-type testGetterStorage struct {
-	Version string
-}
-
-func (p *testGetterStorage) NamespaceScoped() bool {
-	return true
-}
-
-func (p *testGetterStorage) New() apiruntime.Object {
-	return &metav1.APIGroup{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Getter",
-			APIVersion: p.Version,
-		},
-	}
-}
-
-func (p *testGetterStorage) Destroy() {
-}
-
-func (p *testGetterStorage) Get(ctx context.Context, name string, options *metav1.GetOptions) (apiruntime.Object, error) {
-	return nil, nil
-}
-
-func (p *testGetterStorage) GetSingularName() string {
-	return "getter"
-}
-
-type testNoVerbsStorage struct {
-	Version string
-}
-
-func (p *testNoVerbsStorage) NamespaceScoped() bool {
-	return true
-}
-
-func (p *testNoVerbsStorage) New() apiruntime.Object {
-	return &metav1.APIGroup{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "NoVerbs",
-			APIVersion: p.Version,
-		},
-	}
-}
-
-func (p *testNoVerbsStorage) Destroy() {
-}
-
-func (p *testNoVerbsStorage) GetSingularName() string {
-	return "noverb"
-}
 
 func init() {
 	// If instantiated more than once or together with other servers, the
@@ -175,6 +111,8 @@ type TestServerInstanceOptions struct {
 	EmulationVersion string
 	// Set non-default request timeout in the server.
 	RequestTimeout time.Duration
+	// APIs for tests.
+	APIsForTests []genericapiserver.APIGroupInfo
 }
 
 // TestServer return values supplied by kube-test-ApiServer
@@ -473,39 +411,7 @@ func StartTestServer(t ktesting.TB, instanceOptions *TestServerInstanceOptions, 
 	if err != nil {
 		return result, err
 	}
-
-	testAPI := func(gv schema.GroupVersion) genericapiserver.APIGroupInfo {
-		getter, noVerbs := testGetterStorage{}, testNoVerbsStorage{}
-
-		scheme := apiruntime.NewScheme()
-		scheme.AddKnownTypeWithName(gv.WithKind("Getter"), getter.New())
-		scheme.AddKnownTypeWithName(gv.WithKind("NoVerb"), noVerbs.New())
-		scheme.AddKnownTypes(v1GroupVersion, &metav1.Status{})
-		metav1.AddToGroupVersion(scheme, v1GroupVersion)
-
-		codecs := serializer.NewCodecFactory(scheme)
-		parameterCodec := apiruntime.NewParameterCodec(scheme)
-
-		return genericapiserver.APIGroupInfo{
-			PrioritizedVersions: []schema.GroupVersion{gv},
-			VersionedResourcesStorageMap: map[string]map[string]rest.Storage{
-				gv.Version: {
-					"getter":  &testGetterStorage{Version: gv.Version},
-					"noverbs": &testNoVerbsStorage{Version: gv.Version},
-				},
-			},
-			OptionsExternalVersion: &schema.GroupVersion{Version: "v1"},
-			ParameterCodec:         parameterCodec,
-			NegotiatedSerializer:   codecs,
-			Scheme:                 scheme,
-		}
-	}
-
-	apisForTests := []genericapiserver.APIGroupInfo{
-		testAPI(schema.GroupVersion{Group: testOnlyGroupName, Version: "v1"}),
-	}
-
-	server, err := app.CreateServerChainWithAPIsForTests(completed, apisForTests)
+	server, err := app.CreateServerChainWithAPIsForTests(completed, instanceOptions.APIsForTests)
 	if err != nil {
 		return result, fmt.Errorf("failed to create server chain: %v", err)
 	}

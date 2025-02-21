@@ -20,6 +20,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/blang/semver/v4"
+	apiruntime "k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/runtime/serializer"
+	genericapiserver "k8s.io/apiserver/pkg/server"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -45,6 +50,7 @@ import (
 	"k8s.io/apiserver/pkg/authentication/serviceaccount"
 	"k8s.io/apiserver/pkg/authentication/user"
 	genericapirequest "k8s.io/apiserver/pkg/endpoints/request"
+	restapi "k8s.io/apiserver/pkg/registry/rest"
 	"k8s.io/apiserver/pkg/server/dynamiccertificates"
 	genericapiserveroptions "k8s.io/apiserver/pkg/server/options"
 	utilversion "k8s.io/apiserver/pkg/util/version"
@@ -68,6 +74,68 @@ import (
 	wardlev1alpha1client "k8s.io/sample-apiserver/pkg/generated/clientset/versioned/typed/wardle/v1alpha1"
 	netutils "k8s.io/utils/net"
 )
+
+const (
+	testOnlyGroupName = "testonly"
+)
+
+var (
+	testAPIv1GroupVersion = schema.GroupVersion{Group: "", Version: "v1"}
+	testAPIIntroducedAt   = semver.MustParse("1.20.0")
+	testAPIRemovedAt      = semver.MustParse("1.31.0")
+)
+
+type testGetterStorage struct {
+	Version string
+}
+
+func (p *testGetterStorage) NamespaceScoped() bool {
+	return true
+}
+
+func (p *testGetterStorage) New() apiruntime.Object {
+	return &metav1.APIGroup{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Getter",
+			APIVersion: p.Version,
+		},
+	}
+}
+
+func (p *testGetterStorage) Destroy() {
+}
+
+func (p *testGetterStorage) Get(ctx context.Context, name string, options *metav1.GetOptions) (apiruntime.Object, error) {
+	return nil, nil
+}
+
+func (p *testGetterStorage) GetSingularName() string {
+	return "getter"
+}
+
+type testNoVerbsStorage struct {
+	Version string
+}
+
+func (p *testNoVerbsStorage) NamespaceScoped() bool {
+	return true
+}
+
+func (p *testNoVerbsStorage) New() apiruntime.Object {
+	return &metav1.APIGroup{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "NoVerbs",
+			APIVersion: p.Version,
+		},
+	}
+}
+
+func (p *testNoVerbsStorage) Destroy() {
+}
+
+func (p *testNoVerbsStorage) GetSingularName() string {
+	return "noverb"
+}
 
 func TestAPIServiceWaitOnStart(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
@@ -693,10 +761,49 @@ func prepareAggregatedWardleAPIServer(ctx context.Context, t *testing.T, namespa
 	// endpoints cannot have loopback IPs so we need to override the resolver itself
 	t.Cleanup(app.SetServiceResolverForTests(staticURLServiceResolver(fmt.Sprintf("https://127.0.0.1:%d", wardlePort))))
 
+	apisForTests := []genericapiserver.APIGroupInfo{}
+
+	wardleSemVersion, err := semver.ParseTolerant(wardleBinaryVersion)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if wardleSemVersion.GTE(testAPIIntroducedAt) && wardleSemVersion.LT(testAPIRemovedAt) {
+		testAPI := func(gv schema.GroupVersion) genericapiserver.APIGroupInfo {
+			getter, noVerbs := testGetterStorage{}, testNoVerbsStorage{}
+
+			scheme := apiruntime.NewScheme()
+			scheme.AddKnownTypeWithName(gv.WithKind("Getter"), getter.New())
+			scheme.AddKnownTypeWithName(gv.WithKind("NoVerb"), noVerbs.New())
+			scheme.AddKnownTypes(testAPIv1GroupVersion, &metav1.Status{})
+			metav1.AddToGroupVersion(scheme, testAPIv1GroupVersion)
+
+			codecs := serializer.NewCodecFactory(scheme)
+			parameterCodec := apiruntime.NewParameterCodec(scheme)
+
+			return genericapiserver.APIGroupInfo{
+				PrioritizedVersions: []schema.GroupVersion{gv},
+				VersionedResourcesStorageMap: map[string]map[string]restapi.Storage{
+					gv.Version: {
+						"getter":  &testGetterStorage{Version: gv.Version},
+						"noverbs": &testNoVerbsStorage{Version: gv.Version},
+					},
+				},
+				OptionsExternalVersion: &schema.GroupVersion{Version: "v1"},
+				ParameterCodec:         parameterCodec,
+				NegotiatedSerializer:   codecs,
+				Scheme:                 scheme,
+			}
+		}
+
+		apisForTests = append(apisForTests, testAPI(schema.GroupVersion{Group: testOnlyGroupName, Version: "v1"}))
+	}
+
 	testServer := kastesting.StartTestServerOrDie(t,
 		&kastesting.TestServerInstanceOptions{
 			EnableCertAuth: true,
 			BinaryVersion:  kubebinaryVersion,
+			APIsForTests:   apisForTests,
 		},
 		kubeAPIServerFlags,
 		framework.SharedEtcd())
