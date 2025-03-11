@@ -26,7 +26,6 @@ import (
 
 	v1 "k8s.io/api/core/v1"
 	v1beta1 "k8s.io/api/resource/v1beta1"
-	resource "k8s.io/apimachinery/pkg/api/resource"
 	conversion "k8s.io/apimachinery/pkg/conversion"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
@@ -43,18 +42,8 @@ func RegisterConversions(s *runtime.Scheme) error {
 	}); err != nil {
 		return err
 	}
-	if err := s.AddGeneratedConversionFunc((*v1beta1.BasicDevice)(nil), (*BasicDevice)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1beta1_BasicDevice_To_api_BasicDevice(a.(*v1beta1.BasicDevice), b.(*BasicDevice), scope)
-	}); err != nil {
-		return err
-	}
 	if err := s.AddGeneratedConversionFunc((*CapacityPool)(nil), (*v1beta1.CapacityPool)(nil), func(a, b interface{}, scope conversion.Scope) error {
 		return Convert_api_CapacityPool_To_v1beta1_CapacityPool(a.(*CapacityPool), b.(*v1beta1.CapacityPool), scope)
-	}); err != nil {
-		return err
-	}
-	if err := s.AddGeneratedConversionFunc((*v1beta1.CapacityPool)(nil), (*CapacityPool)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1beta1_CapacityPool_To_api_CapacityPool(a.(*v1beta1.CapacityPool), b.(*CapacityPool), scope)
 	}); err != nil {
 		return err
 	}
@@ -100,11 +89,6 @@ func RegisterConversions(s *runtime.Scheme) error {
 	}
 	if err := s.AddGeneratedConversionFunc((*DeviceCapacityConsumption)(nil), (*v1beta1.DeviceCapacityConsumption)(nil), func(a, b interface{}, scope conversion.Scope) error {
 		return Convert_api_DeviceCapacityConsumption_To_v1beta1_DeviceCapacityConsumption(a.(*DeviceCapacityConsumption), b.(*v1beta1.DeviceCapacityConsumption), scope)
-	}); err != nil {
-		return err
-	}
-	if err := s.AddGeneratedConversionFunc((*v1beta1.DeviceCapacityConsumption)(nil), (*DeviceCapacityConsumption)(nil), func(a, b interface{}, scope conversion.Scope) error {
-		return Convert_v1beta1_DeviceCapacityConsumption_To_api_DeviceCapacityConsumption(a.(*v1beta1.DeviceCapacityConsumption), b.(*DeviceCapacityConsumption), scope)
 	}); err != nil {
 		return err
 	}
@@ -178,24 +162,27 @@ func RegisterConversions(s *runtime.Scheme) error {
 	}); err != nil {
 		return err
 	}
+	if err := s.AddConversionFunc((*v1beta1.BasicDevice)(nil), (*BasicDevice)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1beta1_BasicDevice_To_api_BasicDevice(a.(*v1beta1.BasicDevice), b.(*BasicDevice), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddConversionFunc((*v1beta1.CapacityPool)(nil), (*CapacityPool)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1beta1_CapacityPool_To_api_CapacityPool(a.(*v1beta1.CapacityPool), b.(*CapacityPool), scope)
+	}); err != nil {
+		return err
+	}
+	if err := s.AddConversionFunc((*v1beta1.DeviceCapacityConsumption)(nil), (*DeviceCapacityConsumption)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return Convert_v1beta1_DeviceCapacityConsumption_To_api_DeviceCapacityConsumption(a.(*v1beta1.DeviceCapacityConsumption), b.(*DeviceCapacityConsumption), scope)
+	}); err != nil {
+		return err
+	}
 	return nil
 }
 
 func autoConvert_api_BasicDevice_To_v1beta1_BasicDevice(in *BasicDevice, out *v1beta1.BasicDevice, s conversion.Scope) error {
 	out.Attributes = *(*map[v1beta1.QualifiedName]v1beta1.DeviceAttribute)(unsafe.Pointer(&in.Attributes))
-	if in.Capacity != nil {
-		in, out := &in.Capacity, &out.Capacity
-		*out = make(map[v1beta1.QualifiedName]resource.Quantity, len(*in))
-		for key, val := range *in {
-			newVal := new(resource.Quantity)
-			if err := Convert_api_DeviceCapacity_To_resource_Quantity(&val, newVal, s); err != nil {
-				return err
-			}
-			(*out)[v1beta1.QualifiedName(key)] = *newVal
-		}
-	} else {
-		out.Capacity = nil
-	}
+	out.Capacity = *(*map[v1beta1.QualifiedName]v1beta1.DeviceCapacity)(unsafe.Pointer(&in.Capacity))
 	if in.ConsumesCapacity != nil {
 		in, out := &in.ConsumesCapacity, &out.ConsumesCapacity
 		*out = make([]v1beta1.DeviceCapacityConsumption, len(*in))
@@ -222,19 +209,7 @@ func Convert_api_BasicDevice_To_v1beta1_BasicDevice(in *BasicDevice, out *v1beta
 
 func autoConvert_v1beta1_BasicDevice_To_api_BasicDevice(in *v1beta1.BasicDevice, out *BasicDevice, s conversion.Scope) error {
 	out.Attributes = *(*map[QualifiedName]DeviceAttribute)(unsafe.Pointer(&in.Attributes))
-	if in.Capacity != nil {
-		in, out := &in.Capacity, &out.Capacity
-		*out = make(map[QualifiedName]DeviceCapacity, len(*in))
-		for key, val := range *in {
-			newVal := new(DeviceCapacity)
-			if err := Convert_resource_Quantity_To_api_DeviceCapacity(&val, newVal, s); err != nil {
-				return err
-			}
-			(*out)[QualifiedName(key)] = *newVal
-		}
-	} else {
-		out.Capacity = nil
-	}
+	out.Capacity = *(*map[QualifiedName]DeviceCapacity)(unsafe.Pointer(&in.Capacity))
 	// WARNING: in.Includes requires manual conversion: does not exist in peer-type
 	if in.ConsumesCapacity != nil {
 		in, out := &in.ConsumesCapacity, &out.ConsumesCapacity

@@ -23,7 +23,6 @@ package v1beta1
 
 import (
 	corev1 "k8s.io/api/core/v1"
-	resource "k8s.io/apimachinery/pkg/api/resource"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
@@ -95,9 +94,9 @@ func (in *BasicDevice) DeepCopyInto(out *BasicDevice) {
 	}
 	if in.Capacity != nil {
 		in, out := &in.Capacity, &out.Capacity
-		*out = make(map[QualifiedName]resource.Quantity, len(*in))
+		*out = make(map[QualifiedName]DeviceCapacity, len(*in))
 		for key, val := range *in {
-			(*out)[key] = val.DeepCopy()
+			(*out)[key] = *val.DeepCopy()
 		}
 	}
 	if in.Includes != nil {

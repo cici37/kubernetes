@@ -26,14 +26,12 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	resourcev1beta1 "k8s.io/api/resource/v1beta1"
-	apiresource "k8s.io/apimachinery/pkg/api/resource"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	conversion "k8s.io/apimachinery/pkg/conversion"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	types "k8s.io/apimachinery/pkg/types"
 	core "k8s.io/kubernetes/pkg/apis/core"
 	resource "k8s.io/kubernetes/pkg/apis/resource"
-	v1alpha3 "k8s.io/kubernetes/pkg/apis/resource/v1alpha3"
 )
 
 func init() {
@@ -544,19 +542,7 @@ func Convert_resource_AllocationResult_To_v1beta1_AllocationResult(in *resource.
 
 func autoConvert_v1beta1_BasicDevice_To_resource_BasicDevice(in *resourcev1beta1.BasicDevice, out *resource.BasicDevice, s conversion.Scope) error {
 	out.Attributes = *(*map[resource.QualifiedName]resource.DeviceAttribute)(unsafe.Pointer(&in.Attributes))
-	if in.Capacity != nil {
-		in, out := &in.Capacity, &out.Capacity
-		*out = make(map[resource.QualifiedName]resource.DeviceCapacity, len(*in))
-		for key, val := range *in {
-			newVal := new(resource.DeviceCapacity)
-			if err := v1alpha3.Convert_resource_Quantity_To_resource_DeviceCapacity(&val, newVal, s); err != nil {
-				return err
-			}
-			(*out)[resource.QualifiedName(key)] = *newVal
-		}
-	} else {
-		out.Capacity = nil
-	}
+	out.Capacity = *(*map[resource.QualifiedName]resource.DeviceCapacity)(unsafe.Pointer(&in.Capacity))
 	out.Includes = *(*[]resource.DeviceMixinRef)(unsafe.Pointer(&in.Includes))
 	out.ConsumesCapacity = *(*[]resource.DeviceCapacityConsumption)(unsafe.Pointer(&in.ConsumesCapacity))
 	out.NodeName = in.NodeName
@@ -573,19 +559,7 @@ func Convert_v1beta1_BasicDevice_To_resource_BasicDevice(in *resourcev1beta1.Bas
 func autoConvert_resource_BasicDevice_To_v1beta1_BasicDevice(in *resource.BasicDevice, out *resourcev1beta1.BasicDevice, s conversion.Scope) error {
 	out.Includes = *(*[]resourcev1beta1.DeviceMixinRef)(unsafe.Pointer(&in.Includes))
 	out.Attributes = *(*map[resourcev1beta1.QualifiedName]resourcev1beta1.DeviceAttribute)(unsafe.Pointer(&in.Attributes))
-	if in.Capacity != nil {
-		in, out := &in.Capacity, &out.Capacity
-		*out = make(map[resourcev1beta1.QualifiedName]apiresource.Quantity, len(*in))
-		for key, val := range *in {
-			newVal := new(apiresource.Quantity)
-			if err := v1alpha3.Convert_resource_DeviceCapacity_To_resource_Quantity(&val, newVal, s); err != nil {
-				return err
-			}
-			(*out)[resourcev1beta1.QualifiedName(key)] = *newVal
-		}
-	} else {
-		out.Capacity = nil
-	}
+	out.Capacity = *(*map[resourcev1beta1.QualifiedName]resourcev1beta1.DeviceCapacity)(unsafe.Pointer(&in.Capacity))
 	out.ConsumesCapacity = *(*[]resourcev1beta1.DeviceCapacityConsumption)(unsafe.Pointer(&in.ConsumesCapacity))
 	out.NodeName = in.NodeName
 	out.NodeSelector = (*corev1.NodeSelector)(unsafe.Pointer(in.NodeSelector))
