@@ -336,41 +336,6 @@ message CapacityPoolMixinRef {
   optional string name = 1;
 }
 
-// CompositeDeviceMixin defines a mixin that a composite device can include.
-message CompositeDeviceMixin {
-  // Attributes defines the set of attributes for this mixin.
-  // The name of each attribute must be unique in that set.
-  //
-  // To ensure this uniqueness, attributes defined by the vendor
-  // must be listed without the driver name as domain prefix in
-  // their name. All others must be listed with their domain prefix.
-  //
-  // Conflicting attributes from those provided via other mixins are
-  // overwritten by the ones provided here.
-  //
-  // The maximum number of attributes and capacities combined is 32.
-  // This limit is defined in ResourceSliceMaxAttributesAndCapacities.
-  //
-  // +optional
-  map<string, DeviceAttribute> attributes = 1;
-
-  // Capacity defines the set of capacities for this mixin.
-  // The name of each capacity must be unique in that set.
-  //
-  // To ensure this uniqueness, capacities defined by the vendor
-  // must be listed without the driver name as domain prefix in
-  // their name. All others must be listed with their domain prefix.
-  //
-  // Conflicting capacities from those provided via other mixins are
-  // overwritten by the ones provided here.
-  //
-  // The maximum number of attributes and capacities combined is 32.
-  // This limit is defined in ResourceSliceMaxAttributesAndCapacities.
-  //
-  // +optional
-  map<string, .k8s.io.apimachinery.pkg.api.resource.Quantity> capacity = 2;
-}
-
 // Device represents one individual hardware instance that can be selected based
 // on its attributes. Besides the name, exactly one field must be set.
 message Device {
@@ -682,11 +647,37 @@ message DeviceMixin {
   // +required
   optional string name = 1;
 
-  // Composite defines a mixin usable by a composite device.
+  // Attributes defines the set of attributes for this mixin.
+  // The name of each attribute must be unique in that set.
+  //
+  // To ensure this uniqueness, attributes defined by the vendor
+  // must be listed without the driver name as domain prefix in
+  // their name. All others must be listed with their domain prefix.
+  //
+  // Conflicting attributes from those provided via other mixins are
+  // overwritten by the ones provided here.
+  //
+  // The maximum number of attributes and capacities combined is 32.
+  // This limit is defined in ResourceSliceMaxAttributesAndCapacities.
   //
   // +optional
-  // +oneOf=deviceMixinType
-  optional CompositeDeviceMixin composite = 2;
+  map<string, DeviceAttribute> attributes = 2;
+
+  // Capacity defines the set of capacities for this mixin.
+  // The name of each capacity must be unique in that set.
+  //
+  // To ensure this uniqueness, capacities defined by the vendor
+  // must be listed without the driver name as domain prefix in
+  // their name. All others must be listed with their domain prefix.
+  //
+  // Conflicting capacities from those provided via other mixins are
+  // overwritten by the ones provided here.
+  //
+  // The maximum number of attributes and capacities combined is 32.
+  // This limit is defined in ResourceSliceMaxAttributesAndCapacities.
+  //
+  // +optional
+  map<string, .k8s.io.apimachinery.pkg.api.resource.Quantity> capacity = 3;
 }
 
 // DeviceMixinRef defines a reference to a device mixin.

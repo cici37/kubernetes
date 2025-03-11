@@ -915,7 +915,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"k8s.io/api/resource/v1alpha3.CapacityPool":                                                             schema_k8sio_api_resource_v1alpha3_CapacityPool(ref),
 		"k8s.io/api/resource/v1alpha3.CapacityPoolMixin":                                                        schema_k8sio_api_resource_v1alpha3_CapacityPoolMixin(ref),
 		"k8s.io/api/resource/v1alpha3.CapacityPoolMixinRef":                                                     schema_k8sio_api_resource_v1alpha3_CapacityPoolMixinRef(ref),
-		"k8s.io/api/resource/v1alpha3.CompositeDeviceMixin":                                                     schema_k8sio_api_resource_v1alpha3_CompositeDeviceMixin(ref),
 		"k8s.io/api/resource/v1alpha3.Device":                                                                   schema_k8sio_api_resource_v1alpha3_Device(ref),
 		"k8s.io/api/resource/v1alpha3.DeviceAllocationConfiguration":                                            schema_k8sio_api_resource_v1alpha3_DeviceAllocationConfiguration(ref),
 		"k8s.io/api/resource/v1alpha3.DeviceAllocationResult":                                                   schema_k8sio_api_resource_v1alpha3_DeviceAllocationResult(ref),
@@ -959,7 +958,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"k8s.io/api/resource/v1beta1.CapacityPool":                                                              schema_k8sio_api_resource_v1beta1_CapacityPool(ref),
 		"k8s.io/api/resource/v1beta1.CapacityPoolMixin":                                                         schema_k8sio_api_resource_v1beta1_CapacityPoolMixin(ref),
 		"k8s.io/api/resource/v1beta1.CapacityPoolMixinRef":                                                      schema_k8sio_api_resource_v1beta1_CapacityPoolMixinRef(ref),
-		"k8s.io/api/resource/v1beta1.CompositeDeviceMixin":                                                      schema_k8sio_api_resource_v1beta1_CompositeDeviceMixin(ref),
 		"k8s.io/api/resource/v1beta1.Device":                                                                    schema_k8sio_api_resource_v1beta1_Device(ref),
 		"k8s.io/api/resource/v1beta1.DeviceAllocationConfiguration":                                             schema_k8sio_api_resource_v1beta1_DeviceAllocationConfiguration(ref),
 		"k8s.io/api/resource/v1beta1.DeviceAllocationResult":                                                    schema_k8sio_api_resource_v1beta1_DeviceAllocationResult(ref),
@@ -47075,50 +47073,6 @@ func schema_k8sio_api_resource_v1alpha3_CapacityPoolMixinRef(ref common.Referenc
 	}
 }
 
-func schema_k8sio_api_resource_v1alpha3_CompositeDeviceMixin(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "CompositeDeviceMixin defines a mixin that a composite device can include.",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"attributes": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Attributes defines the set of attributes for this mixin. The name of each attribute must be unique in that set.\n\nTo ensure this uniqueness, attributes defined by the vendor must be listed without the driver name as domain prefix in their name. All others must be listed with their domain prefix.\n\nConflicting attributes from those provided via other mixins are overwritten by the ones provided here.\n\nThe maximum number of attributes and capacities combined is 32. This limit is defined in ResourceSliceMaxAttributesAndCapacities.",
-							Type:        []string{"object"},
-							AdditionalProperties: &spec.SchemaOrBool{
-								Allows: true,
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: map[string]interface{}{},
-										Ref:     ref("k8s.io/api/resource/v1alpha3.DeviceAttribute"),
-									},
-								},
-							},
-						},
-					},
-					"capacity": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Capacity defines the set of capacities for this mixin. The name of each capacity must be unique in that set.\n\nTo ensure this uniqueness, capacities defined by the vendor must be listed without the driver name as domain prefix in their name. All others must be listed with their domain prefix.\n\nConflicting capacities from those provided via other mixins are overwritten by the ones provided here.\n\nThe maximum number of attributes and capacities combined is 32. This limit is defined in ResourceSliceMaxAttributesAndCapacities.",
-							Type:        []string{"object"},
-							AdditionalProperties: &spec.SchemaOrBool{
-								Allows: true,
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Ref: ref("k8s.io/apimachinery/pkg/api/resource.Quantity"),
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-		Dependencies: []string{
-			"k8s.io/api/resource/v1alpha3.DeviceAttribute", "k8s.io/apimachinery/pkg/api/resource.Quantity"},
-	}
-}
-
 func schema_k8sio_api_resource_v1alpha3_Device(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -47768,10 +47722,33 @@ func schema_k8sio_api_resource_v1alpha3_DeviceMixin(ref common.ReferenceCallback
 							Format:      "",
 						},
 					},
-					"composite": {
+					"attributes": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Composite defines a mixin usable by a composite device.",
-							Ref:         ref("k8s.io/api/resource/v1alpha3.CompositeDeviceMixin"),
+							Description: "Attributes defines the set of attributes for this mixin. The name of each attribute must be unique in that set.\n\nTo ensure this uniqueness, attributes defined by the vendor must be listed without the driver name as domain prefix in their name. All others must be listed with their domain prefix.\n\nConflicting attributes from those provided via other mixins are overwritten by the ones provided here.\n\nThe maximum number of attributes and capacities combined is 32. This limit is defined in ResourceSliceMaxAttributesAndCapacities.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("k8s.io/api/resource/v1alpha3.DeviceAttribute"),
+									},
+								},
+							},
+						},
+					},
+					"capacity": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Capacity defines the set of capacities for this mixin. The name of each capacity must be unique in that set.\n\nTo ensure this uniqueness, capacities defined by the vendor must be listed without the driver name as domain prefix in their name. All others must be listed with their domain prefix.\n\nConflicting capacities from those provided via other mixins are overwritten by the ones provided here.\n\nThe maximum number of attributes and capacities combined is 32. This limit is defined in ResourceSliceMaxAttributesAndCapacities.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("k8s.io/apimachinery/pkg/api/resource.Quantity"),
+									},
+								},
+							},
 						},
 					},
 				},
@@ -47779,7 +47756,7 @@ func schema_k8sio_api_resource_v1alpha3_DeviceMixin(ref common.ReferenceCallback
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/api/resource/v1alpha3.CompositeDeviceMixin"},
+			"k8s.io/api/resource/v1alpha3.DeviceAttribute", "k8s.io/apimachinery/pkg/api/resource.Quantity"},
 	}
 }
 
@@ -49128,51 +49105,6 @@ func schema_k8sio_api_resource_v1beta1_CapacityPoolMixinRef(ref common.Reference
 	}
 }
 
-func schema_k8sio_api_resource_v1beta1_CompositeDeviceMixin(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "CompositeDeviceMixin defines a mixin that a composite device can include.",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"attributes": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Attributes defines the set of attributes for this mixin. The name of each attribute must be unique in that set.\n\nTo ensure this uniqueness, attributes defined by the vendor must be listed without the driver name as domain prefix in their name. All others must be listed with their domain prefix.\n\nConflicting attributes from those provided via other mixins are overwritten by the ones provided here.\n\nThe maximum number of attributes and capacities combined is 32. This limit is defined in ResourceSliceMaxAttributesAndCapacities.",
-							Type:        []string{"object"},
-							AdditionalProperties: &spec.SchemaOrBool{
-								Allows: true,
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: map[string]interface{}{},
-										Ref:     ref("k8s.io/api/resource/v1beta1.DeviceAttribute"),
-									},
-								},
-							},
-						},
-					},
-					"capacity": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Capacity defines the set of capacities for this mixin. The name of each capacity must be unique in that set.\n\nTo ensure this uniqueness, capacities defined by the vendor must be listed without the driver name as domain prefix in their name. All others must be listed with their domain prefix.\n\nConflicting capacities from those provided via other mixins are overwritten by the ones provided here.\n\nThe maximum number of attributes and capacities combined is 32. This limit is defined in ResourceSliceMaxAttributesAndCapacities.",
-							Type:        []string{"object"},
-							AdditionalProperties: &spec.SchemaOrBool{
-								Allows: true,
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: map[string]interface{}{},
-										Ref:     ref("k8s.io/api/resource/v1beta1.DeviceCapacity"),
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-		Dependencies: []string{
-			"k8s.io/api/resource/v1beta1.DeviceAttribute", "k8s.io/api/resource/v1beta1.DeviceCapacity"},
-	}
-}
-
 func schema_k8sio_api_resource_v1beta1_Device(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -49846,10 +49778,34 @@ func schema_k8sio_api_resource_v1beta1_DeviceMixin(ref common.ReferenceCallback)
 							Format:      "",
 						},
 					},
-					"composite": {
+					"attributes": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Composite defines a mixin usable by a composite device.",
-							Ref:         ref("k8s.io/api/resource/v1beta1.CompositeDeviceMixin"),
+							Description: "Attributes defines the set of attributes for this mixin. The name of each attribute must be unique in that set.\n\nTo ensure this uniqueness, attributes defined by the vendor must be listed without the driver name as domain prefix in their name. All others must be listed with their domain prefix.\n\nConflicting attributes from those provided via other mixins are overwritten by the ones provided here.\n\nThe maximum number of attributes and capacities combined is 32. This limit is defined in ResourceSliceMaxAttributesAndCapacities.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("k8s.io/api/resource/v1beta1.DeviceAttribute"),
+									},
+								},
+							},
+						},
+					},
+					"capacity": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Capacity defines the set of capacities for this mixin. The name of each capacity must be unique in that set.\n\nTo ensure this uniqueness, capacities defined by the vendor must be listed without the driver name as domain prefix in their name. All others must be listed with their domain prefix.\n\nConflicting capacities from those provided via other mixins are overwritten by the ones provided here.\n\nThe maximum number of attributes and capacities combined is 32. This limit is defined in ResourceSliceMaxAttributesAndCapacities.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("k8s.io/api/resource/v1beta1.DeviceCapacity"),
+									},
+								},
+							},
 						},
 					},
 				},
@@ -49857,7 +49813,7 @@ func schema_k8sio_api_resource_v1beta1_DeviceMixin(ref common.ReferenceCallback)
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/api/resource/v1beta1.CompositeDeviceMixin"},
+			"k8s.io/api/resource/v1beta1.DeviceAttribute", "k8s.io/api/resource/v1beta1.DeviceCapacity"},
 	}
 }
 

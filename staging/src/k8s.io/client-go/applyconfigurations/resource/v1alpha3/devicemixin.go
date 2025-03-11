@@ -18,11 +18,17 @@ limitations under the License.
 
 package v1alpha3
 
+import (
+	resourcev1alpha3 "k8s.io/api/resource/v1alpha3"
+	resource "k8s.io/apimachinery/pkg/api/resource"
+)
+
 // DeviceMixinApplyConfiguration represents a declarative configuration of the DeviceMixin type for use
 // with apply.
 type DeviceMixinApplyConfiguration struct {
-	Name      *string                                 `json:"name,omitempty"`
-	Composite *CompositeDeviceMixinApplyConfiguration `json:"composite,omitempty"`
+	Name       *string                                                              `json:"name,omitempty"`
+	Attributes map[resourcev1alpha3.QualifiedName]DeviceAttributeApplyConfiguration `json:"attributes,omitempty"`
+	Capacity   map[resourcev1alpha3.QualifiedName]resource.Quantity                 `json:"capacity,omitempty"`
 }
 
 // DeviceMixinApplyConfiguration constructs a declarative configuration of the DeviceMixin type for use with
@@ -39,10 +45,30 @@ func (b *DeviceMixinApplyConfiguration) WithName(value string) *DeviceMixinApply
 	return b
 }
 
-// WithComposite sets the Composite field in the declarative configuration to the given value
-// and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the Composite field is set to the value of the last call.
-func (b *DeviceMixinApplyConfiguration) WithComposite(value *CompositeDeviceMixinApplyConfiguration) *DeviceMixinApplyConfiguration {
-	b.Composite = value
+// WithAttributes puts the entries into the Attributes field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, the entries provided by each call will be put on the Attributes field,
+// overwriting an existing map entries in Attributes field with the same key.
+func (b *DeviceMixinApplyConfiguration) WithAttributes(entries map[resourcev1alpha3.QualifiedName]DeviceAttributeApplyConfiguration) *DeviceMixinApplyConfiguration {
+	if b.Attributes == nil && len(entries) > 0 {
+		b.Attributes = make(map[resourcev1alpha3.QualifiedName]DeviceAttributeApplyConfiguration, len(entries))
+	}
+	for k, v := range entries {
+		b.Attributes[k] = v
+	}
+	return b
+}
+
+// WithCapacity puts the entries into the Capacity field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, the entries provided by each call will be put on the Capacity field,
+// overwriting an existing map entries in Capacity field with the same key.
+func (b *DeviceMixinApplyConfiguration) WithCapacity(entries map[resourcev1alpha3.QualifiedName]resource.Quantity) *DeviceMixinApplyConfiguration {
+	if b.Capacity == nil && len(entries) > 0 {
+		b.Capacity = make(map[resourcev1alpha3.QualifiedName]resource.Quantity, len(entries))
+	}
+	for k, v := range entries {
+		b.Capacity[k] = v
+	}
 	return b
 }

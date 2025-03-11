@@ -105,16 +105,6 @@ func (CapacityPoolMixinRef) SwaggerDoc() map[string]string {
 	return map_CapacityPoolMixinRef
 }
 
-var map_CompositeDeviceMixin = map[string]string{
-	"":           "CompositeDeviceMixin defines a mixin that a composite device can include.",
-	"attributes": "Attributes defines the set of attributes for this mixin. The name of each attribute must be unique in that set.\n\nTo ensure this uniqueness, attributes defined by the vendor must be listed without the driver name as domain prefix in their name. All others must be listed with their domain prefix.\n\nConflicting attributes from those provided via other mixins are overwritten by the ones provided here.\n\nThe maximum number of attributes and capacities combined is 32. This limit is defined in ResourceSliceMaxAttributesAndCapacities.",
-	"capacity":   "Capacity defines the set of capacities for this mixin. The name of each capacity must be unique in that set.\n\nTo ensure this uniqueness, capacities defined by the vendor must be listed without the driver name as domain prefix in their name. All others must be listed with their domain prefix.\n\nConflicting capacities from those provided via other mixins are overwritten by the ones provided here.\n\nThe maximum number of attributes and capacities combined is 32. This limit is defined in ResourceSliceMaxAttributesAndCapacities.",
-}
-
-func (CompositeDeviceMixin) SwaggerDoc() map[string]string {
-	return map_CompositeDeviceMixin
-}
-
 var map_Device = map[string]string{
 	"":      "Device represents one individual hardware instance that can be selected based on its attributes. Besides the name, exactly one field must be set.",
 	"name":  "Name is unique identifier among all devices managed by the driver in the pool. It must be a DNS label.",
@@ -265,9 +255,10 @@ func (DeviceConstraint) SwaggerDoc() map[string]string {
 }
 
 var map_DeviceMixin = map[string]string{
-	"":          "DeviceMixin defines a specific device mixin for each device type. Besides the name, exactly one field must be set.",
-	"name":      "Name is a unique identifier among all device mixins in the ResourceSlice. It must be a DNS label.",
-	"composite": "Composite defines a mixin usable by a composite device.",
+	"":           "DeviceMixin defines a specific device mixin for each device type. Besides the name, exactly one field must be set.",
+	"name":       "Name is a unique identifier among all device mixins in the ResourceSlice. It must be a DNS label.",
+	"attributes": "Attributes defines the set of attributes for this mixin. The name of each attribute must be unique in that set.\n\nTo ensure this uniqueness, attributes defined by the vendor must be listed without the driver name as domain prefix in their name. All others must be listed with their domain prefix.\n\nConflicting attributes from those provided via other mixins are overwritten by the ones provided here.\n\nThe maximum number of attributes and capacities combined is 32. This limit is defined in ResourceSliceMaxAttributesAndCapacities.",
+	"capacity":   "Capacity defines the set of capacities for this mixin. The name of each capacity must be unique in that set.\n\nTo ensure this uniqueness, capacities defined by the vendor must be listed without the driver name as domain prefix in their name. All others must be listed with their domain prefix.\n\nConflicting capacities from those provided via other mixins are overwritten by the ones provided here.\n\nThe maximum number of attributes and capacities combined is 32. This limit is defined in ResourceSliceMaxAttributesAndCapacities.",
 }
 
 func (DeviceMixin) SwaggerDoc() map[string]string {

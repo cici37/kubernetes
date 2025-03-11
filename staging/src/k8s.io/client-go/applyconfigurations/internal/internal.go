@@ -12577,19 +12577,6 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         scalar: string
       default: ""
-- name: io.k8s.api.resource.v1alpha3.CompositeDeviceMixin
-  map:
-    fields:
-    - name: attributes
-      type:
-        map:
-          elementType:
-            namedType: io.k8s.api.resource.v1alpha3.DeviceAttribute
-    - name: capacity
-      type:
-        map:
-          elementType:
-            namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
 - name: io.k8s.api.resource.v1alpha3.Device
   map:
     fields:
@@ -12769,9 +12756,16 @@ var schemaYAML = typed.YAMLObject(`types:
 - name: io.k8s.api.resource.v1alpha3.DeviceMixin
   map:
     fields:
-    - name: composite
+    - name: attributes
       type:
-        namedType: io.k8s.api.resource.v1alpha3.CompositeDeviceMixin
+        map:
+          elementType:
+            namedType: io.k8s.api.resource.v1alpha3.DeviceAttribute
+    - name: capacity
+      type:
+        map:
+          elementType:
+            namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
     - name: name
       type:
         scalar: string
@@ -13197,19 +13191,6 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         scalar: string
       default: ""
-- name: io.k8s.api.resource.v1beta1.CompositeDeviceMixin
-  map:
-    fields:
-    - name: attributes
-      type:
-        map:
-          elementType:
-            namedType: io.k8s.api.resource.v1beta1.DeviceAttribute
-    - name: capacity
-      type:
-        map:
-          elementType:
-            namedType: io.k8s.api.resource.v1beta1.DeviceCapacity
 - name: io.k8s.api.resource.v1beta1.Device
   map:
     fields:
@@ -13395,9 +13376,16 @@ var schemaYAML = typed.YAMLObject(`types:
 - name: io.k8s.api.resource.v1beta1.DeviceMixin
   map:
     fields:
-    - name: composite
+    - name: attributes
       type:
-        namedType: io.k8s.api.resource.v1beta1.CompositeDeviceMixin
+        map:
+          elementType:
+            namedType: io.k8s.api.resource.v1beta1.DeviceAttribute
+    - name: capacity
+      type:
+        map:
+          elementType:
+            namedType: io.k8s.api.resource.v1beta1.DeviceCapacity
     - name: name
       type:
         scalar: string
