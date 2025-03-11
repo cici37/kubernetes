@@ -12502,6 +12502,9 @@ var schemaYAML = typed.YAMLObject(`types:
 - name: io.k8s.api.resource.v1alpha3.BasicDevice
   map:
     fields:
+    - name: allNodes
+      type:
+        scalar: boolean
     - name: attributes
       type:
         map:
@@ -12512,6 +12515,24 @@ var schemaYAML = typed.YAMLObject(`types:
         map:
           elementType:
             namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+    - name: consumesCapacity
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.resource.v1alpha3.DeviceCapacityConsumption
+          elementRelationship: atomic
+    - name: includes
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.resource.v1alpha3.DeviceMixinRef
+          elementRelationship: atomic
+    - name: nodeName
+      type:
+        scalar: string
+    - name: nodeSelector
+      type:
+        namedType: io.k8s.api.core.v1.NodeSelector
 - name: io.k8s.api.resource.v1alpha3.CELDeviceSelector
   map:
     fields:
@@ -12519,6 +12540,56 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         scalar: string
       default: ""
+- name: io.k8s.api.resource.v1alpha3.CapacityPool
+  map:
+    fields:
+    - name: capacity
+      type:
+        map:
+          elementType:
+            namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+    - name: includes
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.resource.v1alpha3.CapacityPoolMixinRef
+          elementRelationship: atomic
+    - name: name
+      type:
+        scalar: string
+      default: ""
+- name: io.k8s.api.resource.v1alpha3.CapacityPoolMixin
+  map:
+    fields:
+    - name: capacity
+      type:
+        map:
+          elementType:
+            namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+    - name: name
+      type:
+        scalar: string
+      default: ""
+- name: io.k8s.api.resource.v1alpha3.CapacityPoolMixinRef
+  map:
+    fields:
+    - name: name
+      type:
+        scalar: string
+      default: ""
+- name: io.k8s.api.resource.v1alpha3.CompositeDeviceMixin
+  map:
+    fields:
+    - name: attributes
+      type:
+        map:
+          elementType:
+            namedType: io.k8s.api.resource.v1alpha3.DeviceAttribute
+    - name: capacity
+      type:
+        map:
+          elementType:
+            namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
 - name: io.k8s.api.resource.v1alpha3.Device
   map:
     fields:
@@ -12575,6 +12646,43 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: version
       type:
         scalar: string
+- name: io.k8s.api.resource.v1alpha3.DeviceCapacityConsumption
+  map:
+    fields:
+    - name: capacity
+      type:
+        map:
+          elementType:
+            namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+    - name: capacityPool
+      type:
+        scalar: string
+      default: ""
+    - name: includes
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.resource.v1alpha3.DeviceCapacityConsumptionMixinRef
+          elementRelationship: atomic
+- name: io.k8s.api.resource.v1alpha3.DeviceCapacityConsumptionMixin
+  map:
+    fields:
+    - name: capacity
+      type:
+        map:
+          elementType:
+            namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+    - name: name
+      type:
+        scalar: string
+      default: ""
+- name: io.k8s.api.resource.v1alpha3.DeviceCapacityConsumptionMixinRef
+  map:
+    fields:
+    - name: name
+      type:
+        scalar: string
+      default: ""
 - name: io.k8s.api.resource.v1alpha3.DeviceClaim
   map:
     fields:
@@ -12658,6 +12766,23 @@ var schemaYAML = typed.YAMLObject(`types:
           elementType:
             scalar: string
           elementRelationship: atomic
+- name: io.k8s.api.resource.v1alpha3.DeviceMixin
+  map:
+    fields:
+    - name: composite
+      type:
+        namedType: io.k8s.api.resource.v1alpha3.CompositeDeviceMixin
+    - name: name
+      type:
+        scalar: string
+      default: ""
+- name: io.k8s.api.resource.v1alpha3.DeviceMixinRef
+  map:
+    fields:
+    - name: name
+      type:
+        scalar: string
+      default: ""
 - name: io.k8s.api.resource.v1alpha3.DeviceRequest
   map:
     fields:
@@ -12896,12 +13021,39 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         namedType: io.k8s.api.resource.v1alpha3.ResourceSliceSpec
       default: {}
+- name: io.k8s.api.resource.v1alpha3.ResourceSliceMixins
+  map:
+    fields:
+    - name: capacityPool
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.resource.v1alpha3.CapacityPoolMixin
+          elementRelationship: atomic
+    - name: device
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.resource.v1alpha3.DeviceMixin
+          elementRelationship: atomic
+    - name: deviceCapacityConsumption
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.resource.v1alpha3.DeviceCapacityConsumptionMixin
+          elementRelationship: atomic
 - name: io.k8s.api.resource.v1alpha3.ResourceSliceSpec
   map:
     fields:
     - name: allNodes
       type:
         scalar: boolean
+    - name: capacityPools
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.resource.v1alpha3.CapacityPool
+          elementRelationship: atomic
     - name: devices
       type:
         list:
@@ -12912,12 +13064,18 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         scalar: string
       default: ""
+    - name: mixins
+      type:
+        namedType: io.k8s.api.resource.v1alpha3.ResourceSliceMixins
     - name: nodeName
       type:
         scalar: string
     - name: nodeSelector
       type:
         namedType: io.k8s.api.core.v1.NodeSelector
+    - name: perDeviceNodeSelection
+      type:
+        scalar: boolean
     - name: pool
       type:
         namedType: io.k8s.api.resource.v1alpha3.ResourcePool
@@ -12964,6 +13122,84 @@ var schemaYAML = typed.YAMLObject(`types:
 - name: io.k8s.api.resource.v1beta1.BasicDevice
   map:
     fields:
+    - name: allNodes
+      type:
+        scalar: boolean
+    - name: attributes
+      type:
+        map:
+          elementType:
+            namedType: io.k8s.api.resource.v1beta1.DeviceAttribute
+    - name: capacity
+      type:
+        map:
+          elementType:
+            namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+    - name: consumesCapacity
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.resource.v1beta1.DeviceCapacityConsumption
+          elementRelationship: atomic
+    - name: includes
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.resource.v1beta1.DeviceMixinRef
+          elementRelationship: atomic
+    - name: nodeName
+      type:
+        scalar: string
+    - name: nodeSelector
+      type:
+        namedType: io.k8s.api.core.v1.NodeSelector
+- name: io.k8s.api.resource.v1beta1.CELDeviceSelector
+  map:
+    fields:
+    - name: expression
+      type:
+        scalar: string
+      default: ""
+- name: io.k8s.api.resource.v1beta1.CapacityPool
+  map:
+    fields:
+    - name: capacity
+      type:
+        map:
+          elementType:
+            namedType: io.k8s.api.resource.v1beta1.DeviceCapacity
+    - name: includes
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.resource.v1beta1.CapacityPoolMixinRef
+          elementRelationship: atomic
+    - name: name
+      type:
+        scalar: string
+      default: ""
+- name: io.k8s.api.resource.v1beta1.CapacityPoolMixin
+  map:
+    fields:
+    - name: capacity
+      type:
+        map:
+          elementType:
+            namedType: io.k8s.api.resource.v1beta1.DeviceCapacity
+    - name: name
+      type:
+        scalar: string
+      default: ""
+- name: io.k8s.api.resource.v1beta1.CapacityPoolMixinRef
+  map:
+    fields:
+    - name: name
+      type:
+        scalar: string
+      default: ""
+- name: io.k8s.api.resource.v1beta1.CompositeDeviceMixin
+  map:
+    fields:
     - name: attributes
       type:
         map:
@@ -12974,13 +13210,6 @@ var schemaYAML = typed.YAMLObject(`types:
         map:
           elementType:
             namedType: io.k8s.api.resource.v1beta1.DeviceCapacity
-- name: io.k8s.api.resource.v1beta1.CELDeviceSelector
-  map:
-    fields:
-    - name: expression
-      type:
-        scalar: string
-      default: ""
 - name: io.k8s.api.resource.v1beta1.Device
   map:
     fields:
@@ -13043,6 +13272,43 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: value
       type:
         namedType: io.k8s.apimachinery.pkg.api.resource.Quantity
+- name: io.k8s.api.resource.v1beta1.DeviceCapacityConsumption
+  map:
+    fields:
+    - name: capacity
+      type:
+        map:
+          elementType:
+            namedType: io.k8s.api.resource.v1beta1.DeviceCapacity
+    - name: capacityPool
+      type:
+        scalar: string
+      default: ""
+    - name: includes
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.resource.v1beta1.DeviceCapacityConsumptionMixinRef
+          elementRelationship: atomic
+- name: io.k8s.api.resource.v1beta1.DeviceCapacityConsumptionMixin
+  map:
+    fields:
+    - name: capacity
+      type:
+        map:
+          elementType:
+            namedType: io.k8s.api.resource.v1beta1.DeviceCapacity
+    - name: name
+      type:
+        scalar: string
+      default: ""
+- name: io.k8s.api.resource.v1beta1.DeviceCapacityConsumptionMixinRef
+  map:
+    fields:
+    - name: name
+      type:
+        scalar: string
+      default: ""
 - name: io.k8s.api.resource.v1beta1.DeviceClaim
   map:
     fields:
@@ -13126,6 +13392,23 @@ var schemaYAML = typed.YAMLObject(`types:
           elementType:
             scalar: string
           elementRelationship: atomic
+- name: io.k8s.api.resource.v1beta1.DeviceMixin
+  map:
+    fields:
+    - name: composite
+      type:
+        namedType: io.k8s.api.resource.v1beta1.CompositeDeviceMixin
+    - name: name
+      type:
+        scalar: string
+      default: ""
+- name: io.k8s.api.resource.v1beta1.DeviceMixinRef
+  map:
+    fields:
+    - name: name
+      type:
+        scalar: string
+      default: ""
 - name: io.k8s.api.resource.v1beta1.DeviceRequest
   map:
     fields:
@@ -13364,12 +13647,39 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         namedType: io.k8s.api.resource.v1beta1.ResourceSliceSpec
       default: {}
+- name: io.k8s.api.resource.v1beta1.ResourceSliceMixins
+  map:
+    fields:
+    - name: capacityPool
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.resource.v1beta1.CapacityPoolMixin
+          elementRelationship: atomic
+    - name: device
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.resource.v1beta1.DeviceMixin
+          elementRelationship: atomic
+    - name: deviceCapacityConsumption
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.resource.v1beta1.DeviceCapacityConsumptionMixin
+          elementRelationship: atomic
 - name: io.k8s.api.resource.v1beta1.ResourceSliceSpec
   map:
     fields:
     - name: allNodes
       type:
         scalar: boolean
+    - name: capacityPools
+      type:
+        list:
+          elementType:
+            namedType: io.k8s.api.resource.v1beta1.CapacityPool
+          elementRelationship: atomic
     - name: devices
       type:
         list:
@@ -13380,12 +13690,18 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         scalar: string
       default: ""
+    - name: mixins
+      type:
+        namedType: io.k8s.api.resource.v1beta1.ResourceSliceMixins
     - name: nodeName
       type:
         scalar: string
     - name: nodeSelector
       type:
         namedType: io.k8s.api.core.v1.NodeSelector
+    - name: perDeviceNodeSelection
+      type:
+        scalar: boolean
     - name: pool
       type:
         namedType: io.k8s.api.resource.v1beta1.ResourcePool
