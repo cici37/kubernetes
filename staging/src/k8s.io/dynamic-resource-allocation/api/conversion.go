@@ -17,8 +17,11 @@ limitations under the License.
 package api
 
 import (
+	"fmt"
 	"unique"
 
+	corev1 "k8s.io/api/core/v1"
+	v1beta1 "k8s.io/api/resource/v1beta1"
 	conversion "k8s.io/apimachinery/pkg/conversion"
 	"k8s.io/apimachinery/pkg/runtime"
 )
@@ -43,5 +46,113 @@ func Convert_string_To_api_UniqueString(in *string, out *UniqueString, s convers
 		return nil
 	}
 	*out = UniqueString(unique.Make(*in))
+	return nil
+}
+
+func Convert_v1beta1_DeviceCapacityConsumption_To_api_DeviceCapacityConsumption(in *v1beta1.DeviceCapacityConsumption, out *DeviceCapacityConsumption, s conversion.Scope) error {
+	return autoConvert_v1beta1_DeviceCapacityConsumption_To_api_DeviceCapacityConsumption(in, out, s)
+}
+
+type SliceScope struct {
+	SliceContext SliceContext
+}
+
+func (s SliceScope) Meta() *conversion.Meta {
+	return &conversion.Meta{Context: s.SliceContext}
+}
+
+type SliceContext struct {
+	Slice                       *v1beta1.ResourceSlice
+	Node                        *corev1.Node
+	PartitionableDevicesEnabled bool
+}
+
+func sliceContext(s conversion.Scope) (SliceContext, error) {
+	if s == nil {
+		return SliceContext{}, fmt.Errorf("scope must be provided with context of type SliceContext")
+	}
+	sliceContext, ok := s.Meta().Context.(SliceContext)
+	if !ok {
+		return SliceContext{}, fmt.Errorf("context in scope must be of type SliceContext")
+	}
+	return sliceContext, nil
+}
+
+func Convert_v1beta1_CapacityPool_To_api_CapacityPool(in *v1beta1.CapacityPool, out *CapacityPool, s conversion.Scope) error {
+	sliceContext, err := sliceContext(s)
+	if err != nil {
+		return err
+	}
+	slice := sliceContext.Slice
+
+	capacityPoolCapacities := make([]map[v1beta1.QualifiedName]v1beta1.DeviceCapacity, 0)
+	for _, entry := range in.Includes {
+		var mixin v1beta1.CapacityPoolMixin
+		for _, m := range slice.Spec.Mixins.CapacityPool {
+			if entry.Name == m.Name {
+				mixin = m
+			}
+		}
+		capacityPoolCapacities = append(capacityPoolCapacities, mixin.Capacity)
+	}
+	capacityPoolCapacities = append(capacityPoolCapacities, in.Capacity)
+
+	if err := autoConvert_v1beta1_CapacityPool_To_api_CapacityPool(in, out, s); err != nil {
+		return err
+	}
+	out.Capacity = flattenCapacity(capacityPoolCapacities...)
+	return nil
+}
+
+func flattenCapacity(capacities ...map[v1beta1.QualifiedName]v1beta1.DeviceCapacity) map[QualifiedName]DeviceCapacity {
+	var hasNonEmptyCapacity bool
+	for _, capacity := range capacities {
+		if len(capacity) > 0 {
+			hasNonEmptyCapacity = true
+			break
+		}
+	}
+	if !hasNonEmptyCapacity {
+		return nil
+	}
+
+	flattenedCapacity := make(map[QualifiedName]DeviceCapacity)
+	for _, capacity := range capacities {
+		for name, cap := range capacity {
+			var outCap DeviceCapacity
+			if err := Convert_v1beta1_DeviceCapacity_To_api_DeviceCapacity(&cap, &outCap, nil); err != nil {
+				continue
+			}
+			flattenedCapacity[QualifiedName(name)] = outCap
+		}
+	}
+	return flattenedCapacity
+}
+
+func Convert_api_Attributes_To_v1beta1_Attributes(in map[QualifiedName]DeviceAttribute, out map[v1beta1.QualifiedName]v1beta1.DeviceAttribute) error {
+	for name, attr := range in {
+		var outDeviceAttribute v1beta1.DeviceAttribute
+		if err := Convert_api_DeviceAttribute_To_v1beta1_DeviceAttribute(&attr, &outDeviceAttribute, nil); err != nil {
+			return err
+		}
+		out[v1beta1.QualifiedName(name)] = outDeviceAttribute
+	}
+	return nil
+}
+
+func Convert_api_Capacity_To_v1beta1_Capacity(in map[QualifiedName]DeviceCapacity, out map[v1beta1.QualifiedName]v1beta1.DeviceCapacity) error {
+	for name, cap := range in {
+		var outDeviceCapacity v1beta1.DeviceCapacity
+		if err := Convert_api_DeviceCapacity_To_v1beta1_DeviceCapacity(&cap, &outDeviceCapacity, nil); err != nil {
+			return err
+		}
+		out[v1beta1.QualifiedName(name)] = outDeviceCapacity
+	}
+	return nil
+}
+
+func Convert_v1beta1_BasicDevice_To_api_BasicDevice(in *v1beta1.BasicDevice, out *BasicDevice, s conversion.Scope) error {
+	out.Capacity = *(*map[v1beta1.QualifiedName]v1beta1.DeviceCapacity)(unsafe.Pointer(&in.Capacity))
+	return nil
 	return nil
 }

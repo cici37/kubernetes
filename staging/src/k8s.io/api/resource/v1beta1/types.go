@@ -524,7 +524,7 @@ type BasicDevice struct {
 	// This limit is defined in ResourceSliceMaxAttributesAndCapacities.
 	//
 	// +optional
-	Capacity map[QualifiedName]resource.Quantity `json:"capacity,omitempty" protobuf:"bytes,2,rep,name=capacity"`
+	Capacity map[QualifiedName]DeviceCapacity `json:"capacity,omitempty" protobuf:"bytes,2,rep,name=capacity"`
 
 	// Includes defines the set of device mixins that this device includes.
 	//

@@ -7,7 +7,6 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	corev1 "k8s.io/api/core/v1"
 	resourcev1beta1 "k8s.io/api/resource/v1beta1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	draapi "k8s.io/dynamic-resource-allocation/api"
@@ -15,10 +14,9 @@ import (
 
 func TestConversion(t *testing.T) {
 	testcases := map[string]struct {
-		in                          resourcev1beta1.ResourceSlice
-		partitionableDevicesEnabled bool
-		expectOut                   draapi.ResourceSlice
-		expectErr                   string
+		in        resourcev1beta1.ResourceSlice
+		expectOut draapi.ResourceSlice
+		expectErr string
 	}{
 		"simple-resourceslice-with-basic-devices": {
 			in: resourcev1beta1.ResourceSlice{
@@ -42,10 +40,8 @@ func TestConversion(t *testing.T) {
 										}(),
 									},
 								},
-								Capacity: map[resourcev1beta1.QualifiedName]resourcev1beta1.DeviceCapacity{
-									resourcev1beta1.QualifiedName("memory"): {
-										Value: resource.MustParse("50Gi"),
-									},
+								Capacity: map[resourcev1beta1.QualifiedName]resource.Quantity{
+									resourcev1beta1.QualifiedName("memory"): resource.MustParse("50Gi"),
 								},
 							},
 						},
@@ -68,17 +64,19 @@ func TestConversion(t *testing.T) {
 					Devices: []draapi.Device{
 						{
 							Name: draapi.MakeUniqueString("device-1"),
-							Attributes: map[draapi.QualifiedName]draapi.DeviceAttribute{
-								draapi.QualifiedName("foo"): {
-									IntValue: func() *int64 {
-										i := int64(42)
-										return &i
-									}(),
+							Basic: &draapi.BasicDevice{
+								Attributes: map[draapi.QualifiedName]draapi.DeviceAttribute{
+									draapi.QualifiedName("foo"): {
+										IntValue: func() *int64 {
+											i := int64(42)
+											return &i
+										}(),
+									},
 								},
-							},
-							Capacity: map[draapi.QualifiedName]draapi.DeviceCapacity{
-								draapi.QualifiedName("memory"): {
-									Value: resource.MustParse("50Gi"),
+								Capacity: map[draapi.QualifiedName]draapi.DeviceCapacity{
+									draapi.QualifiedName("memory"): {
+										Value: resource.MustParse("50Gi"),
+									},
 								},
 							},
 						},
@@ -104,46 +102,42 @@ func TestConversion(t *testing.T) {
 						Device: []resourcev1beta1.DeviceMixin{
 							{
 								Name: "device-mixin-1",
-								Composite: &resourcev1beta1.CompositeDeviceMixin{
-									Attributes: map[resourcev1beta1.QualifiedName]resourcev1beta1.DeviceAttribute{
-										resourcev1beta1.QualifiedName("attribute-1"): {
-											IntValue: func() *int64 {
-												val := int64(42)
-												return &val
-											}(),
-										},
-										resourcev1beta1.QualifiedName("attribute-2"): {
-											StringValue: func() *string {
-												val := "foo"
-												return &val
-											}(),
-										},
+								Attributes: map[resourcev1beta1.QualifiedName]resourcev1beta1.DeviceAttribute{
+									resourcev1beta1.QualifiedName("attribute-1"): {
+										IntValue: func() *int64 {
+											val := int64(42)
+											return &val
+										}(),
 									},
-									Capacity: map[resourcev1beta1.QualifiedName]resourcev1beta1.DeviceCapacity{
-										resourcev1beta1.QualifiedName("memory"): {
-											Value: resource.MustParse("50Gi"),
-										},
-										resourcev1beta1.QualifiedName("processors"): {
-											Value: resource.MustParse("42"),
-										},
+									resourcev1beta1.QualifiedName("attribute-2"): {
+										StringValue: func() *string {
+											val := "foo"
+											return &val
+										}(),
+									},
+								},
+								Capacity: map[resourcev1beta1.QualifiedName]resourcev1beta1.DeviceCapacity{
+									resourcev1beta1.QualifiedName("memory"): {
+										Value: resource.MustParse("50Gi"),
+									},
+									resourcev1beta1.QualifiedName("processors"): {
+										Value: resource.MustParse("42"),
 									},
 								},
 							},
 							{
 								Name: "device-mixin-2",
-								Composite: &resourcev1beta1.CompositeDeviceMixin{
-									Attributes: map[resourcev1beta1.QualifiedName]resourcev1beta1.DeviceAttribute{
-										resourcev1beta1.QualifiedName("attribute-2"): {
-											StringValue: func() *string {
-												val := "bar"
-												return &val
-											}(),
-										},
+								Attributes: map[resourcev1beta1.QualifiedName]resourcev1beta1.DeviceAttribute{
+									resourcev1beta1.QualifiedName("attribute-2"): {
+										StringValue: func() *string {
+											val := "bar"
+											return &val
+										}(),
 									},
-									Capacity: map[resourcev1beta1.QualifiedName]resourcev1beta1.DeviceCapacity{
-										resourcev1beta1.QualifiedName("processors"): {
-											Value: resource.MustParse("24"),
-										},
+								},
+								Capacity: map[resourcev1beta1.QualifiedName]resourcev1beta1.DeviceCapacity{
+									resourcev1beta1.QualifiedName("processors"): {
+										Value: resource.MustParse("24"),
 									},
 								},
 							},
@@ -152,7 +146,7 @@ func TestConversion(t *testing.T) {
 					Devices: []resourcev1beta1.Device{
 						{
 							Name: "device-1",
-							Composite: &resourcev1beta1.CompositeDevice{
+							Basic: &resourcev1beta1.BasicDevice{
 								Includes: []resourcev1beta1.DeviceMixinRef{
 									{
 										Name: "device-mixin-1",
@@ -175,13 +169,9 @@ func TestConversion(t *testing.T) {
 										}(),
 									},
 								},
-								Capacity: map[resourcev1beta1.QualifiedName]resourcev1beta1.DeviceCapacity{
-									resourcev1beta1.QualifiedName("memory"): {
-										Value: resource.MustParse("20Gi"),
-									},
-									resourcev1beta1.QualifiedName("gpus"): {
-										Value: resource.MustParse("24"),
-									},
+								Capacity: map[resourcev1beta1.QualifiedName]resource.Quantity{
+									resourcev1beta1.QualifiedName("memory"): resource.MustParse("20Gi"),
+									resourcev1beta1.QualifiedName("gpus"):   resource.MustParse("24"),
 								},
 							},
 						},
@@ -200,35 +190,37 @@ func TestConversion(t *testing.T) {
 					Devices: []draapi.Device{
 						{
 							Name: draapi.MakeUniqueString("device-1"),
-							Attributes: map[draapi.QualifiedName]draapi.DeviceAttribute{
-								draapi.QualifiedName("attribute-1"): {
-									IntValue: func() *int64 {
-										i := int64(24)
-										return &i
-									}(),
+							Basic: &draapi.BasicDevice{
+								Attributes: map[draapi.QualifiedName]draapi.DeviceAttribute{
+									draapi.QualifiedName("attribute-1"): {
+										IntValue: func() *int64 {
+											i := int64(24)
+											return &i
+										}(),
+									},
+									draapi.QualifiedName("attribute-2"): {
+										StringValue: func() *string {
+											val := "bar"
+											return &val
+										}(),
+									},
+									draapi.QualifiedName("attribute-3"): {
+										BoolValue: func() *bool {
+											val := true
+											return &val
+										}(),
+									},
 								},
-								draapi.QualifiedName("attribute-2"): {
-									StringValue: func() *string {
-										val := "bar"
-										return &val
-									}(),
-								},
-								draapi.QualifiedName("attribute-3"): {
-									BoolValue: func() *bool {
-										val := true
-										return &val
-									}(),
-								},
-							},
-							Capacity: map[draapi.QualifiedName]draapi.DeviceCapacity{
-								draapi.QualifiedName("memory"): {
-									Value: resource.MustParse("20Gi"),
-								},
-								draapi.QualifiedName("processors"): {
-									Value: resource.MustParse("24"),
-								},
-								draapi.QualifiedName("gpus"): {
-									Value: resource.MustParse("24"),
+								Capacity: map[draapi.QualifiedName]draapi.DeviceCapacity{
+									draapi.QualifiedName("memory"): {
+										Value: resource.MustParse("20Gi"),
+									},
+									draapi.QualifiedName("processors"): {
+										Value: resource.MustParse("24"),
+									},
+									draapi.QualifiedName("gpus"): {
+										Value: resource.MustParse("24"),
+									},
 								},
 							},
 						},
@@ -273,7 +265,7 @@ func TestConversion(t *testing.T) {
 					Devices: []resourcev1beta1.Device{
 						{
 							Name: "device-1",
-							Composite: &resourcev1beta1.CompositeDevice{
+							Basic: &resourcev1beta1.BasicDevice{
 								ConsumesCapacity: []resourcev1beta1.DeviceCapacityConsumption{
 									{
 										CapacityPool: "capacity-pool",
@@ -312,18 +304,20 @@ func TestConversion(t *testing.T) {
 					Devices: []draapi.Device{
 						{
 							Name: draapi.MakeUniqueString("device-1"),
-							ConsumesCapacity: []draapi.DeviceCapacityConsumption{
-								{
-									CapacityPool: draapi.MakeUniqueString("capacity-pool"),
-									Capacity: map[draapi.QualifiedName]draapi.DeviceCapacity{
-										draapi.QualifiedName("memory"): {
-											Value: resource.MustParse("20Gi"),
-										},
-										draapi.QualifiedName("processors"): {
-											Value: resource.MustParse("24"),
-										},
-										draapi.QualifiedName("gpus"): {
-											Value: resource.MustParse("24"),
+							Basic: &draapi.BasicDevice{
+								ConsumesCapacity: []draapi.DeviceCapacityConsumption{
+									{
+										CapacityPool: draapi.MakeUniqueString("capacity-pool"),
+										Capacity: map[draapi.QualifiedName]draapi.DeviceCapacity{
+											draapi.QualifiedName("memory"): {
+												Value: resource.MustParse("20Gi"),
+											},
+											draapi.QualifiedName("processors"): {
+												Value: resource.MustParse("24"),
+											},
+											draapi.QualifiedName("gpus"): {
+												Value: resource.MustParse("24"),
+											},
 										},
 									},
 								},
@@ -423,14 +417,7 @@ func TestConversion(t *testing.T) {
 	for name, tc := range testcases {
 		t.Run(name, func(t *testing.T) {
 			var out draapi.ResourceSlice
-			scope := draapi.SliceScope{
-				SliceContext: draapi.SliceContext{
-					Slice:                       &tc.in,
-					Node:                        &corev1.Node{},
-					PartitionableDevicesEnabled: tc.partitionableDevicesEnabled,
-				},
-			}
-			err := draapi.Convert_v1beta1_ResourceSlice_To_api_ResourceSlice(&tc.in, &out, scope)
+			err := draapi.Convert_v1beta1_ResourceSlice_To_api_ResourceSlice(&tc.in, &out, nil)
 			if err != nil {
 				if len(tc.expectErr) == 0 {
 					t.Fatalf("unexpected error %v", err)
