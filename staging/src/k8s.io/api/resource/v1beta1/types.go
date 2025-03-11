@@ -394,15 +394,6 @@ type DeviceMixin struct {
 	// +required
 	Name string `json:"name" protobuf:"bytes,1,name=name"`
 
-	// Composite defines a mixin usable by a composite device.
-	//
-	// +optional
-	// +oneOf=deviceMixinType
-	Composite *CompositeDeviceMixin `json:"composite,omitempty" protobuf:"bytes,2,name=composite"`
-}
-
-// CompositeDeviceMixin defines a mixin that a composite device can include.
-type CompositeDeviceMixin struct {
 	// Attributes defines the set of attributes for this mixin.
 	// The name of each attribute must be unique in that set.
 	//
@@ -417,7 +408,7 @@ type CompositeDeviceMixin struct {
 	// This limit is defined in ResourceSliceMaxAttributesAndCapacities.
 	//
 	// +optional
-	Attributes map[QualifiedName]DeviceAttribute `json:"attributes,omitempty" protobuf:"bytes,1,name=attributes"`
+	Attributes map[QualifiedName]DeviceAttribute `json:"attributes,omitempty" protobuf:"bytes,2,name=attributes"`
 
 	// Capacity defines the set of capacities for this mixin.
 	// The name of each capacity must be unique in that set.
@@ -433,7 +424,7 @@ type CompositeDeviceMixin struct {
 	// This limit is defined in ResourceSliceMaxAttributesAndCapacities.
 	//
 	// +optional
-	Capacity map[QualifiedName]DeviceCapacity `json:"capacity,omitempty" protobuf:"bytes,2,name=capacity"`
+	Capacity map[QualifiedName]DeviceCapacity `json:"capacity,omitempty" protobuf:"bytes,3,name=capacity"`
 }
 
 // DeviceCapacityConsumptionMixin defines a mixin that composite
