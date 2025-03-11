@@ -114,38 +114,40 @@ var sliceWithPartitionableDevices = &resource.ResourceSlice{
 		Devices: []resource.Device{
 			{
 				Name: "device",
-				Includes: []resource.DeviceMixinRef{
-					{
-						Name: "device-mixin",
-					},
-				},
-				ConsumesCapacity: []resource.DeviceCapacityConsumption{
-					{
-						CapacityPool: "pool-mixin",
-						Includes: []resource.DeviceCapacityConsumptionMixinRef{
-							{
-								Name: "device-capacity-consumption-mixin",
-							},
-						},
-						Capacity: map[resource.QualifiedName]resource.DeviceCapacity{
-							resource.QualifiedName("memory"): {
-								Value: k8sresource.MustParse("40Gi"),
-							},
+				Basic: &resource.BasicDevice{
+					Includes: []resource.DeviceMixinRef{
+						{
+							Name: "device-mixin",
 						},
 					},
-				},
-				NodeName: "valid-node-name",
-				Attributes: map[resource.QualifiedName]resource.DeviceAttribute{
-					resource.QualifiedName("version"): {
-						StringValue: func() *string {
-							v := "v1"
-							return &v
-						}(),
+					ConsumesCapacity: []resource.DeviceCapacityConsumption{
+						{
+							CapacityPool: "pool-mixin",
+							Includes: []resource.DeviceCapacityConsumptionMixinRef{
+								{
+									Name: "device-capacity-consumption-mixin",
+								},
+							},
+							Capacity: map[resource.QualifiedName]resource.DeviceCapacity{
+								resource.QualifiedName("memory"): {
+									Value: k8sresource.MustParse("40Gi"),
+								},
+							},
+						},
 					},
-				},
-				Capacity: map[resource.QualifiedName]resource.DeviceCapacity{
-					resource.QualifiedName("memory"): {
-						Value: k8sresource.MustParse("40Gi"),
+					NodeName: "valid-node-name",
+					Attributes: map[resource.QualifiedName]resource.DeviceAttribute{
+						resource.QualifiedName("version"): {
+							StringValue: func() *string {
+								v := "v1"
+								return &v
+							}(),
+						},
+					},
+					Capacity: map[resource.QualifiedName]resource.DeviceCapacity{
+						resource.QualifiedName("memory"): {
+							Value: k8sresource.MustParse("40Gi"),
+						},
 					},
 				},
 			},
@@ -191,7 +193,7 @@ func TestResourceSliceStrategyCreate(t *testing.T) {
 				obj := sliceWithPartitionableDevices.DeepCopy()
 				obj.Spec.PerDeviceNodeSelection = false
 				obj.Spec.NodeName = "valid-node-name"
-				obj.Spec.Devices[0].NodeName = ""
+				obj.Spec.Devices[0].Basic.NodeName = ""
 				return obj
 			}(),
 			partitionableDevices: false,
@@ -204,9 +206,11 @@ func TestResourceSliceStrategyCreate(t *testing.T) {
 				obj.Spec.NodeName = "valid-node-name"
 				obj.Spec.Devices = []resource.Device{
 					{
-						Name:       obj.Spec.Devices[0].Name,
-						Attributes: obj.Spec.Devices[0].Attributes,
-						Capacity:   obj.Spec.Devices[0].Capacity,
+						Name: obj.Spec.Devices[0].Name,
+						Basic: &resource.BasicDevice{
+							Attributes: obj.Spec.Devices[0].Basic.Attributes,
+							Capacity:   obj.Spec.Devices[0].Basic.Capacity,
+						},
 					},
 				}
 				return obj
@@ -304,9 +308,9 @@ func TestResourceSliceStrategyUpdate(t *testing.T) {
 				obj.Spec.PerDeviceNodeSelection = false
 				obj.Spec.NodeName = "valid-node-name"
 				obj.Spec.Mixins = nil
-				obj.Spec.Devices[0].Includes = nil
-				obj.Spec.Devices[0].ConsumesCapacity = nil
-				obj.Spec.Devices[0].NodeName = ""
+				obj.Spec.Devices[0].Basic.Includes = nil
+				obj.Spec.Devices[0].Basic.ConsumesCapacity = nil
+				obj.Spec.Devices[0].Basic.NodeName = ""
 				return obj
 			}(),
 		},

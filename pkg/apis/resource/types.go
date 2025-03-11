@@ -481,6 +481,16 @@ type Device struct {
 	// +required
 	Name string
 
+	// Basic defines one device instance.
+	//
+	// +optional
+	// +oneOf=deviceType
+	Basic *BasicDevice
+}
+
+// BasicDevice defines one device instance.
+type BasicDevice struct {
+
 	// Includes defines the set of device mixins that this device includes.
 	//
 	// The propertes of each included mixin are applied to this device in

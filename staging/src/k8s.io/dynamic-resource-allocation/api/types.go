@@ -37,6 +37,30 @@ type ResourceSliceSpec struct {
 	Devices                []Device
 	PerDeviceNodeSelection bool
 	CapacityPools          []CapacityPool
+	Mixins                 *ResourceSliceMixins
+}
+
+type ResourceSliceMixins struct {
+	Device                    []DeviceMixin
+	DeviceCapacityConsumption []DeviceCapacityConsumptionMixin
+	CapacityPool              []CapacityPoolMixin
+}
+
+type DeviceMixin struct {
+	Name       string
+	Attributes map[QualifiedName]DeviceAttribute
+	Capacity   map[QualifiedName]DeviceCapacity
+}
+
+type DeviceCapacityConsumptionMixin struct {
+	Name     string
+	Capacity map[QualifiedName]DeviceCapacity
+}
+
+// CapacityPoolMixin defines a mixin that a capacity pool can include.
+type CapacityPoolMixin struct {
+	Name     string
+	Capacity map[QualifiedName]DeviceCapacity
 }
 
 type ResourcePool struct {
@@ -51,7 +75,11 @@ type CapacityPool struct {
 }
 
 type Device struct {
-	Name             UniqueString
+	Name  UniqueString
+	Basic *BasicDevice
+}
+
+type BasicDevice struct {
 	Attributes       map[QualifiedName]DeviceAttribute
 	Capacity         map[QualifiedName]DeviceCapacity
 	ConsumesCapacity []DeviceCapacityConsumption

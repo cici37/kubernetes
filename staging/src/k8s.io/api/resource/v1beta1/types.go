@@ -499,54 +499,10 @@ type Device struct {
 	// +optional
 	// +oneOf=deviceType
 	Basic *BasicDevice `json:"basic,omitempty" protobuf:"bytes,2,opt,name=basic"`
-
-	// Composite defines one composite device instance.
-	//
-	// +optional
-	// +oneOf=deviceType
-	Composite *CompositeDevice `json:"composite,omitempty" protobuf:"bytes,3,opt,name=composite"`
 }
 
 // BasicDevice defines one device instance.
 type BasicDevice struct {
-	// Attributes defines the set of attributes for this device.
-	// The name of each attribute must be unique in that set.
-	//
-	// The maximum number of attributes and capacities combined is 32.
-	// This limit is defined in ResourceSliceMaxAttributesAndCapacities.
-	//
-	// +optional
-	Attributes map[QualifiedName]DeviceAttribute `json:"attributes,omitempty" protobuf:"bytes,1,rep,name=attributes"`
-
-	// Capacity defines the set of capacities for this device.
-	// The name of each capacity must be unique in that set.
-	//
-	// The maximum number of attributes and capacities combined is 32.
-	// This limit is defined in ResourceSliceMaxAttributesAndCapacities.
-	//
-	// +optional
-	Capacity map[QualifiedName]DeviceCapacity `json:"capacity,omitempty" protobuf:"bytes,2,rep,name=capacity"`
-}
-
-// CompositeDevice defines one device instance.
-type CompositeDevice struct {
-	// Includes defines the set of device mixins that this device includes.
-	//
-	// The propertes of each included mixin are applied to this device in
-	// order. Conflicting properties from multiple mixins are taken from the
-	// last mixin listed that contains them. Properties set on the device will
-	// always override properties from mixins.
-	//
-	// The mixins referenced here must be defined in the same
-	// ResourceSlice.
-	//
-	// The maximum number of mixins that can be included is 8. This limit is
-	// defined in ResourceSliceMaxCapacityPoolMixinRefs.
-	//
-	// +optional
-	// +listType=atomic
-	Includes []DeviceMixinRef `json:"includes,omitempty" protobuf:"bytes,1,rep,name=includes"`
-
 	// Attributes defines the set of attributes for this device.
 	// The name of each attribute must be unique in that set.
 	//
@@ -561,7 +517,7 @@ type CompositeDevice struct {
 	// This limit is defined in ResourceSliceMaxAttributesAndCapacities.
 	//
 	// +optional
-	Attributes map[QualifiedName]DeviceAttribute `json:"attributes,omitempty" protobuf:"bytes,2,rep,name=attributes"`
+	Attributes map[QualifiedName]DeviceAttribute `json:"attributes,omitempty" protobuf:"bytes,1,rep,name=attributes"`
 
 	// Capacity defines the set of capacities for this device.
 	// The name of each capacity must be unique in that set.
@@ -577,7 +533,24 @@ type CompositeDevice struct {
 	// This limit is defined in ResourceSliceMaxAttributesAndCapacities.
 	//
 	// +optional
-	Capacity map[QualifiedName]DeviceCapacity `json:"capacity,omitempty" protobuf:"bytes,3,rep,name=capacity"`
+	Capacity map[QualifiedName]resource.Quantity `json:"capacity,omitempty" protobuf:"bytes,2,rep,name=capacity"`
+
+	// Includes defines the set of device mixins that this device includes.
+	//
+	// The propertes of each included mixin are applied to this device in
+	// order. Conflicting properties from multiple mixins are taken from the
+	// last mixin listed that contains them. Properties set on the device will
+	// always override properties from mixins.
+	//
+	// The mixins referenced here must be defined in the same
+	// ResourceSlice.
+	//
+	// The maximum number of mixins that can be included is 8. This limit is
+	// defined in ResourceSliceMaxCapacityPoolMixinRefs.
+	//
+	// +optional
+	// +listType=atomic
+	Includes []DeviceMixinRef `json:"includes,omitempty" protobuf:"bytes,3,rep,name=includes"`
 
 	// ConsumesCapacity defines a list of references to capacity
 	// pools and the set of capacities that the device will
@@ -587,8 +560,6 @@ type CompositeDevice struct {
 	// or more DeviceCapacityConsumptionMixins by listing
 	// the capacities directly. The latter will always override
 	// any capacities coming in from the mixins.
-	//
-	// There can only be a single entry per capacity pool.
 	//
 	// The maximum number of device capacity consumption entries
 	// is 32. This is the same as the maximum number of capacity

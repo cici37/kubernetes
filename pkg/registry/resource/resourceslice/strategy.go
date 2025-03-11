@@ -170,11 +170,13 @@ func dropDisabledDRAPartitionableDevicesFields(newSlice, oldSlice *resource.Reso
 	newSlice.Spec.Mixins = nil
 	newSlice.Spec.PerDeviceNodeSelection = false
 	for i := range newSlice.Spec.Devices {
-		newSlice.Spec.Devices[i].Includes = nil
-		newSlice.Spec.Devices[i].ConsumesCapacity = nil
-		newSlice.Spec.Devices[i].NodeName = ""
-		newSlice.Spec.Devices[i].NodeSelector = nil
-		newSlice.Spec.Devices[i].AllNodes = false
+		if newSlice.Spec.Devices[i].Basic != nil {
+			newSlice.Spec.Devices[i].Basic.Includes = nil
+			newSlice.Spec.Devices[i].Basic.ConsumesCapacity = nil
+			newSlice.Spec.Devices[i].Basic.NodeName = ""
+			newSlice.Spec.Devices[i].Basic.NodeSelector = nil
+			newSlice.Spec.Devices[i].Basic.AllNodes = false
+		}
 	}
 }
 
@@ -196,21 +198,12 @@ func draPartitionableDevicesFeatureInUse(slice *resource.ResourceSlice) bool {
 	}
 
 	for _, device := range spec.Devices {
-		if len(device.Includes) > 0 {
-			return true
+		if device.Basic != nil {
+			if len(device.Basic.Includes) > 0 || len(device.Basic.ConsumesCapacity) > 0 || device.Basic.NodeName == "" || device.Basic.NodeSelector != nil || device.Basic.AllNodes {
+				return true
+			}
 		}
-		if len(device.ConsumesCapacity) > 0 {
-			return true
-		}
-		if device.NodeName == "" {
-			return true
-		}
-		if device.NodeSelector != nil {
-			return true
-		}
-		if device.AllNodes {
-			return true
-		}
+
 	}
 	return false
 }
